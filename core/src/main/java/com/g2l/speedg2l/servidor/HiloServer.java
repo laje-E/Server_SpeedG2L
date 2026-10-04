@@ -1,11 +1,16 @@
 package com.g2l.speedg2l.servidor;
 
+import com.g2l.speedg2l.entidades.Entidad;
+import com.g2l.speedg2l.entidades.Jugador;
+import com.g2l.speedg2l.entidades.Jugadores;
 import com.g2l.speedg2l.pantallas.PantallaJuego;
+import com.g2l.speedg2l.utilidades.Entradas;
 
 import javax.xml.crypto.Data;
 import java.io.IOException;
 import java.net.*;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 
 public class HiloServer extends Thread{
 
@@ -14,6 +19,12 @@ public class HiloServer extends Thread{
     private boolean fin = false;
     private DireccionRed [] direccionesClientes = new DireccionRed[2];
     private int cantClientes = 0;
+
+    private Jugador[] jugadores = new Jugador[2];
+
+    private Entradas entradas = new Entradas();
+
+    private ArrayList<Entidad> listaEntidades = new ArrayList<>();
 
     public HiloServer(){
         try {
@@ -28,10 +39,23 @@ public class HiloServer extends Thread{
         byte[] data = mensaje.getBytes();
         DatagramPacket dp = new DatagramPacket(data, data.length, ipDestino, puerto);
         try {
-            System.out.println("Mensaje: " + (new String (dp.getData())).trim());
+//            System.out.println("Mensaje: " + (new String (dp.getData())).trim());
             puertoServer.send(dp);
         }catch (IOException event){
             event.printStackTrace();
+        }
+    }
+
+    public void enviarMensajeATodos(String mensaje){
+        for(int i=0; i<cantClientes; i++){
+            byte[] data = mensaje.getBytes();
+            DatagramPacket dp = new DatagramPacket(data, data.length, direccionesClientes[i].getIp(), direccionesClientes[i].getPuerto());
+            try {
+//                System.out.println("Mensaje: " + (new String (dp.getData())).trim());
+                puertoServer.send(dp);
+            }catch (IOException event){
+                event.printStackTrace();
+            }
         }
     }
 
@@ -46,10 +70,11 @@ public class HiloServer extends Thread{
             try {
                 puertoServer.receive(dp);
 
-                System.out.println("Recibí un paquete de: "
-                    + dp.getAddress()
-                    + ":"
-                    + dp.getPort());
+//                System.out.println("Recibí un paquete de: "
+//                    + dp.getAddress()
+//                    + ":"
+//                    + dp.getPort());
+//                actualizarFisicasJugadores();
 
             } catch (IOException event) {
                 event.printStackTrace();
@@ -60,9 +85,15 @@ public class HiloServer extends Thread{
         } while(!fin);
     }
 
+//    private void actualizarFisicasJugadores() {
+//        for(int i=0; i<jugadores.length; i++){
+//            jugadores[i].actualizarFisicas();
+//        }
+//    }
+
     private void procesarMensaje(DatagramPacket dp){
         String mensaje = (new String (dp.getData())).trim();
-        System.out.println("mensaje cliente: " + mensaje);
+//      System.out.println("mensaje cliente: " + mensaje);
         if(mensaje.equals("Conexion")){
             if(cantClientes < 2) {
                 if (cantClientes == 0) {
@@ -86,9 +117,70 @@ public class HiloServer extends Thread{
                 enviarMensaje("ERROR-limiteDeClientesAlcanzado", dp.getAddress(), dp.getPort());
             }
         }
+        String[] mensajePorPartes = mensaje.split("-");
+        int numeroCliente = detectarCliente(dp);
+            if (mensajePorPartes[0].equals("Aprete")) {
+                System.out.println(mensaje);
+                if (mensajePorPartes[1].equals("Izquierda")) {
+
+                    jugadores[numeroCliente].moverIzquierda(true);
+                    enviarMensajeATodos("Movimiento-PosicionX-" + jugadores[numeroCliente].getPosicionX() + "-" + Jugadores.values()[numeroCliente] +
+                                        "Movimiento-PosicionY-" + jugadores[numeroCliente].getPosicionY() + "-" + Jugadores.values()[numeroCliente]);
+                    enviarMensajeATodos("Movimiento-PosicionY-" + jugadores[numeroCliente].getPosicionY() + "-" + Jugadores.values()[numeroCliente] );
+
+                } else if (mensajePorPartes[1].equals("Derecha")) {
+
+                    jugadores[numeroCliente].moverDerecha(true);
+                    enviarMensajeATodos("Movimiento-PosicionX-" + jugadores[numeroCliente].getPosicionX() + "-" + Jugadores.values()[numeroCliente]);
+                    enviarMensajeATodos("Movimiento-PosicionY-" + jugadores[numeroCliente].getPosicionY() + "-" + Jugadores.values()[numeroCliente]);
+
+                } else if (mensajePorPartes[1].equals("Arriba")) {
+
+                    jugadores[numeroCliente].saltar();
+                    enviarMensajeATodos("Movimiento-PosicionX-" + jugadores[numeroCliente].getPosicionX() + "-" + Jugadores.values()[numeroCliente]);
+                    enviarMensajeATodos("Movimiento-PosicionY-" + jugadores[numeroCliente].getPosicionY() + "-" + Jugadores.values()[numeroCliente]);
+
+                }
+            } else if (mensajePorPartes[0].equals("NoAprete")) {
+                if (mensajePorPartes[1].equals("Izquierda")) {
+
+                    jugadores[numeroCliente].moverIzquierda(false);
+                    enviarMensajeATodos("Movimiento-PosicionX-" + jugadores[numeroCliente].getPosicionX() + "-" + Jugadores.values()[numeroCliente]);
+                    enviarMensajeATodos("Movimiento-PosicionY-" + jugadores[numeroCliente].getPosicionY() + "-" + Jugadores.values()[numeroCliente]);
+
+                } else if (mensajePorPartes[1].equals("Derecha")) {
+
+                    jugadores[numeroCliente].moverDerecha(false);
+                    enviarMensajeATodos("Movimiento-PosicionX-" + jugadores[numeroCliente].getPosicionX() + "-" + Jugadores.values()[numeroCliente]);
+                    enviarMensajeATodos("Movimiento-PosicionY-" + jugadores[numeroCliente].getPosicionY() + "-" + Jugadores.values()[numeroCliente]);
+
+                }
+            }
+
+    }
+
+    private int detectarCliente(DatagramPacket dp) {
+        int numeroCliente = -1;
+        int i=0;
+        while(i<direccionesClientes.length && numeroCliente == -1){
+            if (dp.getAddress().equals(direccionesClientes[i].getIp()) && dp.getPort() == direccionesClientes[i].getPuerto()){
+                numeroCliente = i;
+            }
+            i++;
+        }
+        return numeroCliente;
     }
 
     public int getCantClientes() {
         return cantClientes;
+    }
+
+    public void almacenarJugadores(Jugador jugador, Jugador jugador2) {
+        jugadores[0] = jugador;
+        jugadores[1] = jugador2;
+    }
+
+    public void almacenarListaEntidades(ArrayList<Entidad> listaDeEntidades) {
+        this.listaEntidades = listaDeEntidades;
     }
 }

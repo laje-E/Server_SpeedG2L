@@ -100,6 +100,9 @@ public class PantallaJuego extends Pantalla {
 
         hiloServidor = new HiloServer();
         hiloServidor.start();
+
+        hiloServidor.almacenarJugadores(jugador, jugador2);
+        hiloServidor.almacenarListaEntidades(listaDeEntidades);
     }
 
     private void crearYaplicarMusica() {
@@ -123,7 +126,7 @@ public class PantallaJuego extends Pantalla {
 
     @Override
     public void render(float delta) {
-        if(hiloServidor.getCantClientes() < 2){
+        if(hiloServidor.getCantClientes() < 1){
             b.begin();
 
             textoEspera.dibujar();
@@ -151,10 +154,8 @@ public class PantallaJuego extends Pantalla {
                 if (!musicaJuego.estaReproduciendo()) {
                     musicaJuego.reproducir();
                 }
-                jugador.moverJugador(entradas, Jugadores.JUGADOR_1);
                 jugador.actualizarFisicas(listaDeEntidades, delta);
                 jugador.animar(delta);
-                jugador2.moverJugador(entradas, Jugadores.JUGADOR_2);
                 jugador2.actualizarFisicas(listaDeEntidades, delta);
                 jugador2.animar(delta);
                 hud.actualizar();
@@ -270,5 +271,18 @@ public class PantallaJuego extends Pantalla {
 
     public void terminarJuego(){
         empieza = false;
+    }
+
+    public Jugador getJugador(Jugadores jugadorElegido) {
+        if (jugadorElegido.equals(Jugadores.JUGADOR_1)) {
+            return jugador;
+        }
+        else{
+            return jugador2;
+        }
+    }
+
+    public ArrayList<Entidad> getListaDeEntidades() {
+        return listaDeEntidades;
     }
 }
