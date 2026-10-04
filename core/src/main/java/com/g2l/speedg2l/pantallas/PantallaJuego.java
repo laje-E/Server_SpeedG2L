@@ -18,6 +18,7 @@ import com.g2l.speedg2l.componentes.interfaz.Hud;
 import com.g2l.speedg2l.entidades.*;
 import com.g2l.speedg2l.mundo.Camara;
 import com.g2l.speedg2l.mundo.Mapa;
+import com.g2l.speedg2l.servidor.HiloServer;
 import com.g2l.speedg2l.sonidos.Musica;
 import com.g2l.speedg2l.utilidades.Config;
 import com.g2l.speedg2l.utilidades.Entradas;
@@ -50,7 +51,13 @@ public class PantallaJuego extends Pantalla {
     private ShapeRenderer pantallaPausa = new ShapeRenderer();
     private Texto textoPausa = new Texto(Recursos.FUENTE_MENU, 60, Color.RED);
 
+    private Texto textoEspera = new Texto(Recursos.FUENTE_MENU, 60, Color.WHITE);
+
     private Meta meta;
+
+    public static boolean empieza = false;
+
+    private HiloServer hiloServidor;
 
     protected PantallaJuego(Game juego) {
         super(juego);
@@ -76,6 +83,12 @@ public class PantallaJuego extends Pantalla {
 
         textoPausa.setTexto("PAUSADO");
 
+        textoEspera.setTexto("Esperando jugador");
+        textoEspera.setPosition(
+            (Config.getAnchoJuego() / 2) - (textoPausa.getAncho() / 2),
+            (Config.getAltoJuego() / 2) + (textoPausa.getAlto() / 2)
+        );
+
         cargarColisionesDesdeMapa();
 
         stage = new Stage(
@@ -84,6 +97,9 @@ public class PantallaJuego extends Pantalla {
                 Config.getAltoJuego()
             )
         );
+
+        hiloServidor = new HiloServer();
+        hiloServidor.start();
     }
 
     private void crearYaplicarMusica() {
@@ -107,64 +123,74 @@ public class PantallaJuego extends Pantalla {
 
     @Override
     public void render(float delta) {
-        delta = Gdx.graphics.getDeltaTime();
+        if(hiloServidor.getCantClientes() < 2){
+            b.begin();
 
-        Render.limpiarPantalla();
+            textoEspera.dibujar();
 
-        camara.seguirJugador(jugador);
-
-        mapa.dibujar(camara.getCamara());
-
-        b.setProjectionMatrix(camara.getCamara().combined);
-        b.begin();
-
-        if(entradas.escape()){
-            pausado = !pausado;
+            b.end();
         }
 
-        if(!pausado) {
-            if(!musicaJuego.estaReproduciendo()) {
-                musicaJuego.reproducir();
+        if(empieza) {
+            delta = Gdx.graphics.getDeltaTime();
+
+            Render.limpiarPantalla();
+
+            camara.seguirJugador(jugador);
+
+            mapa.dibujar(camara.getCamara());
+
+            b.setProjectionMatrix(camara.getCamara().combined);
+            b.begin();
+
+            if (entradas.escape()) {
+                pausado = !pausado;
             }
-            jugador.moverJugador(entradas, Jugadores.JUGADOR_1);
-            jugador.actualizarFisicas(listaDeEntidades, delta);
-            jugador.animar(delta);
-            jugador2.moverJugador(entradas, Jugadores.JUGADOR_2);
-            jugador2.actualizarFisicas(listaDeEntidades, delta);
-            jugador2.animar(delta);
-            hud.actualizar();
-            if(jugador.colisionaCon(meta)){
-                cambiarPantalla(new PantallaFin(juego, hud.getTiempo()));
-                musicaJuego.cerrar();
+
+            if (!pausado) {
+                if (!musicaJuego.estaReproduciendo()) {
+                    musicaJuego.reproducir();
+                }
+                jugador.moverJugador(entradas, Jugadores.JUGADOR_1);
+                jugador.actualizarFisicas(listaDeEntidades, delta);
+                jugador.animar(delta);
+                jugador2.moverJugador(entradas, Jugadores.JUGADOR_2);
+                jugador2.actualizarFisicas(listaDeEntidades, delta);
+                jugador2.animar(delta);
+                hud.actualizar();
+                if (jugador.colisionaCon(meta)) {
+                    cambiarPantalla(new PantallaFin(juego, hud.getTiempo()));
+                    musicaJuego.cerrar();
+                }
+            } else if (pausado) {
+                textoPausa.setPosition(
+                    (Config.getAnchoJuego() / 2) - (textoPausa.getAncho() / 2),
+                    (Config.getAltoJuego() / 2) + (textoPausa.getAlto() / 2)
+                );
+
+                musicaJuego.pausar();
             }
-        } else if(pausado){
-            textoPausa.setPosition(
-                (Config.getAnchoJuego() / 2) - (textoPausa.getAncho() / 2),
-                (Config.getAltoJuego() / 2) + (textoPausa.getAlto() / 2)
-            );
 
-            musicaJuego.pausar();
+            jugador.dibujar();
+            jugador2.dibujar();
+
+            b.end();
+
+            b.setProjectionMatrix(stage.getCamera().combined);
+
+            if (pausado) {
+                dibujarPausa();
+            }
+
+            b.begin();
+
+            hud.dibujar();
+
+            b.end();
+
+            stage.act(delta);
+            stage.draw();
         }
-
-        jugador.dibujar();
-        jugador2.dibujar();
-
-        b.end();
-
-        b.setProjectionMatrix(stage.getCamera().combined);
-
-        if (pausado) {
-            dibujarPausa();
-        }
-
-        b.begin();
-
-        hud.dibujar();
-
-        b.end();
-
-        stage.act(delta);
-        stage.draw();
     }
 
     private void dibujarPausa() {
@@ -236,5 +262,13 @@ public class PantallaJuego extends Pantalla {
         musicaJuego.cerrar();
         Render.musicaJuego = null;
         jugador.cerrar();
+    }
+
+    public static void empezarJuego(){
+        empieza = true;
+    }
+
+    public void terminarJuego(){
+        empieza = false;
     }
 }

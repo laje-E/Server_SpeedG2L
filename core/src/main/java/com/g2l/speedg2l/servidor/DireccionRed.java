@@ -10,12 +10,9 @@ public class DireccionRed {
     private InetAddress ip;
     private int puerto;
 
-    public DireccionRed (String ip, int puerto){
-        try {
-            this.ip = InetAddress.getByName(ip);
-        }catch (UnknownHostException event){
-            event.printStackTrace();
-        }
+    public DireccionRed (InetAddress ip, int puerto){
+        this.ip = ip;
+        this.puerto = puerto;
     }
 
     public InetAddress getIp() {
