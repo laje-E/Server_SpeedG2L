@@ -158,6 +158,9 @@ public class PantallaJuego extends Pantalla {
                 jugador.animar(delta);
                 jugador2.actualizarFisicas(listaDeEntidades, delta);
                 jugador2.animar(delta);
+
+                hiloServidor.almacenarDelta(delta);
+
                 hud.actualizar();
                 if (jugador.colisionaCon(meta)) {
                     cambiarPantalla(new PantallaFin(juego, hud.getTiempo()));

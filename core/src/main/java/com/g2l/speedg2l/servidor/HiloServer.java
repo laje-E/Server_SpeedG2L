@@ -25,6 +25,7 @@ public class HiloServer extends Thread{
     private Entradas entradas = new Entradas();
 
     private ArrayList<Entidad> listaEntidades = new ArrayList<>();
+    private float delta;
 
     public HiloServer(){
         try {
@@ -74,7 +75,8 @@ public class HiloServer extends Thread{
 //                    + dp.getAddress()
 //                    + ":"
 //                    + dp.getPort());
-//                actualizarFisicasJugadores();
+                jugadores[0].actualizarFisicas(listaEntidades, delta);
+                jugadores[1].actualizarFisicas(listaEntidades, delta);
 
             } catch (IOException event) {
                 event.printStackTrace();
@@ -124,35 +126,34 @@ public class HiloServer extends Thread{
                 if (mensajePorPartes[1].equals("Izquierda")) {
 
                     jugadores[numeroCliente].moverIzquierda(true);
-                    enviarMensajeATodos("Movimiento-PosicionX-" + jugadores[numeroCliente].getPosicionX() + "-" + Jugadores.values()[numeroCliente] +
-                                        "Movimiento-PosicionY-" + jugadores[numeroCliente].getPosicionY() + "-" + Jugadores.values()[numeroCliente]);
-                    enviarMensajeATodos("Movimiento-PosicionY-" + jugadores[numeroCliente].getPosicionY() + "-" + Jugadores.values()[numeroCliente] );
+                    enviarMensajeATodos("Movimiento-" + jugadores[numeroCliente].getPosicionX() + "-" +
+                                         jugadores[numeroCliente].getPosicionY() + "-" + Jugadores.values()[numeroCliente]);
 
                 } else if (mensajePorPartes[1].equals("Derecha")) {
 
                     jugadores[numeroCliente].moverDerecha(true);
-                    enviarMensajeATodos("Movimiento-PosicionX-" + jugadores[numeroCliente].getPosicionX() + "-" + Jugadores.values()[numeroCliente]);
-                    enviarMensajeATodos("Movimiento-PosicionY-" + jugadores[numeroCliente].getPosicionY() + "-" + Jugadores.values()[numeroCliente]);
+                    enviarMensajeATodos("Movimiento-" + jugadores[numeroCliente].getPosicionX() + "-" +
+                                         jugadores[numeroCliente].getPosicionY() + "-" + Jugadores.values()[numeroCliente]);
 
                 } else if (mensajePorPartes[1].equals("Arriba")) {
 
                     jugadores[numeroCliente].saltar();
-                    enviarMensajeATodos("Movimiento-PosicionX-" + jugadores[numeroCliente].getPosicionX() + "-" + Jugadores.values()[numeroCliente]);
-                    enviarMensajeATodos("Movimiento-PosicionY-" + jugadores[numeroCliente].getPosicionY() + "-" + Jugadores.values()[numeroCliente]);
+                    enviarMensajeATodos("Movimiento-" + jugadores[numeroCliente].getPosicionX() + "-" +
+                        jugadores[numeroCliente].getPosicionY() + "-" + Jugadores.values()[numeroCliente]);
 
                 }
             } else if (mensajePorPartes[0].equals("NoAprete")) {
                 if (mensajePorPartes[1].equals("Izquierda")) {
 
                     jugadores[numeroCliente].moverIzquierda(false);
-                    enviarMensajeATodos("Movimiento-PosicionX-" + jugadores[numeroCliente].getPosicionX() + "-" + Jugadores.values()[numeroCliente]);
-                    enviarMensajeATodos("Movimiento-PosicionY-" + jugadores[numeroCliente].getPosicionY() + "-" + Jugadores.values()[numeroCliente]);
+                    enviarMensajeATodos("Movimiento-" + jugadores[numeroCliente].getPosicionX() + "-" +
+                        jugadores[numeroCliente].getPosicionY() + "-" + Jugadores.values()[numeroCliente]);
 
                 } else if (mensajePorPartes[1].equals("Derecha")) {
 
                     jugadores[numeroCliente].moverDerecha(false);
-                    enviarMensajeATodos("Movimiento-PosicionX-" + jugadores[numeroCliente].getPosicionX() + "-" + Jugadores.values()[numeroCliente]);
-                    enviarMensajeATodos("Movimiento-PosicionY-" + jugadores[numeroCliente].getPosicionY() + "-" + Jugadores.values()[numeroCliente]);
+                    enviarMensajeATodos("Movimiento-" + jugadores[numeroCliente].getPosicionX() + "-" +
+                        jugadores[numeroCliente].getPosicionY() + "-" + Jugadores.values()[numeroCliente]);
 
                 }
             }
@@ -182,5 +183,9 @@ public class HiloServer extends Thread{
 
     public void almacenarListaEntidades(ArrayList<Entidad> listaDeEntidades) {
         this.listaEntidades = listaDeEntidades;
+    }
+
+    public void almacenarDelta(float delta) {
+        this.delta = delta;
     }
 }
