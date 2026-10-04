@@ -51,10 +51,12 @@ public class HiloServer extends Thread{
         if(mensaje.equals("Conexion")){
             if(cantClientes == 0){
                 direccionesClientes[0] = new DireccionRed(dp.getAddress().toString(), dp.getPort());
+                enviarMensaje("OK", direccionesClientes[0].getIp(), direccionesClientes[0].getPuerto());
                 cantClientes++;
             }
             else if(cantClientes == 1){
                 direccionesClientes[1] = new DireccionRed(dp.getAddress().toString(), dp.getPort());
+                enviarMensaje("OK", direccionesClientes[1].getIp(), direccionesClientes[1].getPuerto());
                 cantClientes++;
             }
             else{
