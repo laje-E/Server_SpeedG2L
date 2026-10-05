@@ -75,14 +75,15 @@ public class HiloServer extends Thread{
 //                    + dp.getAddress()
 //                    + ":"
 //                    + dp.getPort());
-                jugadores[0].actualizarFisicas(listaEntidades, delta);
-                jugadores[1].actualizarFisicas(listaEntidades, delta);
 
             } catch (IOException event) {
                 event.printStackTrace();
             }
 
             procesarMensaje(dp);
+
+            jugadores[0].actualizarFisicas(listaEntidades, delta);
+            jugadores[1].actualizarFisicas(listaEntidades, delta);
 
         } while(!fin);
     }
@@ -108,7 +109,7 @@ public class HiloServer extends Thread{
                     enviarMensaje("OK", direccionesClientes[1].getIp(), direccionesClientes[1].getPuerto());
                     cantClientes++;
                 }
-                if (cantClientes == 2){
+                if (cantClientes == 1){
                     for (int i=0; i<cantClientes; i++){
                         enviarMensaje("Empezar", direccionesClientes[i].getIp(), direccionesClientes[i].getPuerto());
                         PantallaJuego.empezarJuego();
