@@ -98,15 +98,18 @@ public class PantallaJuego extends Pantalla {
             )
         );
 
-        hiloServidor = new HiloServer();
+        crearYConfigurarHiloServer();
         hiloServidor.start();
 
+    }
+
+    private void crearYConfigurarHiloServer() {
+        hiloServidor = new HiloServer();
         hiloServidor.almacenarJugadores(jugador, jugador2);
         hiloServidor.almacenarListaEntidades(listaDeEntidades);
     }
 
     private void crearYaplicarMusica() {
-
         if (Render.musicaJuego == null) {
             Render.musicaJuego = new Musica(Recursos.MUSICA_JUEGO);
             Render.musicaJuego.repetir(true);
