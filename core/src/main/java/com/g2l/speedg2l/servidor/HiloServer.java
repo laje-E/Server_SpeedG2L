@@ -204,4 +204,8 @@ public class HiloServer extends Thread{
     public void almacenarDelta(float delta) {
         this.delta = delta;
     }
+
+    public void finalizarHilo(){
+        fin = true;
+    }
 }
