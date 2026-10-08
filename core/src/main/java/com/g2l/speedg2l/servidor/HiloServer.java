@@ -22,13 +22,13 @@ public class HiloServer extends Thread{
     private Cliente[] clientes;
     private int cantClientes=0;
     private Jugador jugador1, jugador2;
-    private ArrayList<Entidad> listaEntidades;
+//  private ArrayList<Entidad> listaEntidades;
 
-    private float delta;
+//    private float delta;
 
     public HiloServer(){
         clientes = new Cliente[2];
-        listaEntidades = new ArrayList<>();
+//      listaEntidades = new ArrayList<>();
         try {
             direccionServer = InetAddress.getByName("255.255.255.255");
             puertoServer = new DatagramSocket(6412);
@@ -76,8 +76,6 @@ public class HiloServer extends Thread{
 //                    + dp.getAddress()
 //                    + ":"
 //                    + dp.getPort());
-                jugador1.actualizarFisicas(listaEntidades, delta);
-                jugador2.actualizarFisicas(listaEntidades, delta);
 
             } catch (IOException event) {
                 event.printStackTrace();
@@ -169,6 +167,8 @@ public class HiloServer extends Thread{
                     }
                 }
 
+//                jugadorCliente.actualizarFisicas(listaEntidades, delta);
+
             }
 
         }
@@ -196,13 +196,13 @@ public class HiloServer extends Thread{
         this.jugador2 = jugador2;
     }
 
-    public void almacenarListaEntidades(ArrayList<Entidad> listaDeEntidades) {
-        this.listaEntidades = listaDeEntidades;
-    }
+//    public void almacenarListaEntidades(ArrayList<Entidad> listaDeEntidades) {
+//        this.listaEntidades = listaDeEntidades;
+//    }
 
-    public void almacenarDelta(float delta) {
-        this.delta = delta;
-    }
+//    public void almacenarDelta(float delta) {
+//        this.delta = delta;
+//    }
 
     public void finalizarHilo(){
         fin = true;

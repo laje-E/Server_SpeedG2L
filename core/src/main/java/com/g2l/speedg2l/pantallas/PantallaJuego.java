@@ -34,14 +34,12 @@ public class PantallaJuego extends Pantalla {
     private Jugador jugador;
     private Jugador jugador2;
     private SpriteBatch b;
-    private Musica musicaJuego;
     private Hud hud;
 
     private Pincho pincho;
     private Imagen imgPincho;
 
     private ArrayList<Entidad> listaDeEntidades;
-    private ArrayList<Obstaculo> listaDeObstaculos;
 
     private Mapa mapa;
     private Camara camara;
@@ -67,8 +65,6 @@ public class PantallaJuego extends Pantalla {
     public void show() {
         b = Render.batch;
 
-        crearYaplicarMusica();
-
         camara = new Camara(configViewport);
         mapa = new Mapa(Recursos.NIVEL_1);
         entradas = new Entradas();
@@ -79,15 +75,11 @@ public class PantallaJuego extends Pantalla {
         meta = new Meta(50.0f, 1000.0f, 8000.0f, 100.0f);
 
         listaDeEntidades = new ArrayList<>();
-        listaDeObstaculos = new ArrayList<>();
 
         textoPausa.setTexto("PAUSADO");
 
         textoEspera.setTexto("Esperando jugador");
-        textoEspera.setPosition(
-            (Config.getAnchoJuego() / 2) - (textoPausa.getAncho() / 2),
-            (Config.getAltoJuego() / 2) + (textoPausa.getAlto() / 2)
-        );
+        textoEspera.centrar();
 
         cargarColisionesDesdeMapa();
 
@@ -106,25 +98,6 @@ public class PantallaJuego extends Pantalla {
     private void crearYConfigurarHiloServer() {
         hiloServidor = new HiloServer();
         hiloServidor.almacenarJugadores(jugador, jugador2);
-        hiloServidor.almacenarListaEntidades(listaDeEntidades);
-    }
-
-    private void crearYaplicarMusica() {
-        if (Render.musicaJuego == null) {
-            Render.musicaJuego = new Musica(Recursos.MUSICA_JUEGO);
-            Render.musicaJuego.repetir(true);
-        }
-        if (Config.isSonidoSilenciado()) {
-            Render.musicaJuego.setVolumen(0.0f);
-        } else {
-            Render.musicaJuego.setVolumen(Config.getVolumenMaster());
-        }
-
-        musicaJuego = Render.musicaJuego;
-
-        if (!musicaJuego.estaReproduciendo()) {
-            musicaJuego.reproducir();
-        }
     }
 
     @Override
@@ -154,20 +127,17 @@ public class PantallaJuego extends Pantalla {
             }
 
             if (!pausado) {
-                if (!musicaJuego.estaReproduciendo()) {
-                    musicaJuego.reproducir();
-                }
-                jugador.actualizarFisicas(listaDeEntidades, delta);
-                jugador.animar(delta);
-                jugador2.actualizarFisicas(listaDeEntidades, delta);
-                jugador2.animar(delta);
+                  jugador.actualizarFisicas(listaDeEntidades, delta);
+//                jugador.animar(delta);
+                  jugador2.actualizarFisicas(listaDeEntidades, delta);
+//                jugador2.animar3(delta);
 
-                hiloServidor.almacenarDelta(delta);
+//               hiloServidor.almacenarDelta(delta);
 
                 hud.actualizar();
                 if (jugador.colisionaCon(meta)) {
                     cambiarPantalla(new PantallaFin(juego, hud.getTiempo()));
-                    musicaJuego.cerrar();
+//                  musicaJuego.cerrar();
                 }
             } else if (pausado) {
                 textoPausa.setPosition(
@@ -175,7 +145,7 @@ public class PantallaJuego extends Pantalla {
                     (Config.getAltoJuego() / 2) + (textoPausa.getAlto() / 2)
                 );
 
-                musicaJuego.pausar();
+     //           musicaJuego.pausar();
             }
 
             jugador.dibujar();
@@ -267,7 +237,7 @@ public class PantallaJuego extends Pantalla {
         hiloServidor.finalizarHilo();
         stage.dispose();
         b.dispose();
-        musicaJuego.cerrar();
+    //    musicaJuego.cerrar();
         Render.musicaJuego = null;
         jugador.cerrar();
     }
