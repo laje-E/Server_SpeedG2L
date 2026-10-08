@@ -120,6 +120,7 @@ public class HiloServer extends Thread{
                     for (int i=0; i<cantClientes; i++){
                         DireccionRed direccionRedCliente = clientes[i].getDireccionRed();
                         enviarMensaje("Empezar", direccionRedCliente.getIp(), direccionRedCliente.getPuerto());
+                        enviarMensaje("NumeroJugador-" + Jugadores.values()[i].toString(), direccionRedCliente.getIp(), direccionRedCliente.getPuerto());
                         PantallaJuego.empezarJuego();
                     }
                 }
