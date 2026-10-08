@@ -135,7 +135,6 @@ public class HiloServer extends Thread{
             } else{
                 Jugador jugadorCliente = clientes[numeroCliente].getJugador();
                 if (mensajePorPartes[0].equals("Aprete")) {
-                    System.out.println(mensaje);
                     if (mensajePorPartes[1].equals("Izquierda")) {
                         jugadorCliente.moverIzquierda(true);
                         enviarMensajeATodos("Movimiento-" + jugadorCliente.getPosicionX() + "-" +

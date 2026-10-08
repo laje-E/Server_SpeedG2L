@@ -129,7 +129,7 @@ public class PantallaJuego extends Pantalla {
 
     @Override
     public void render(float delta) {
-        if(hiloServidor.getCantClientes() < 1){
+        if(hiloServidor.getCantClientes() < 2){
             b.begin();
 
             textoEspera.dibujar();
