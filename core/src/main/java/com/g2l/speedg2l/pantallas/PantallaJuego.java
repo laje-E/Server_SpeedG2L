@@ -19,6 +19,7 @@ import com.g2l.speedg2l.entidades.*;
 import com.g2l.speedg2l.mundo.Camara;
 import com.g2l.speedg2l.mundo.Mapa;
 import com.g2l.speedg2l.servidor.HiloServer;
+import com.g2l.speedg2l.servidor.PosicionFinal;
 import com.g2l.speedg2l.sonidos.Musica;
 import com.g2l.speedg2l.utilidades.Config;
 import com.g2l.speedg2l.utilidades.Entradas;
@@ -56,6 +57,9 @@ public class PantallaJuego extends Pantalla {
     public static boolean empieza = false;
 
     private HiloServer hiloServidor;
+
+    private PosicionFinal[] posiciones = new PosicionFinal[2];
+    private int contadorPosicion = 0;
 
     protected PantallaJuego(Game juego) {
         super(juego);
@@ -136,8 +140,30 @@ public class PantallaJuego extends Pantalla {
 
                 hud.actualizar();
                 if (jugador.colisionaCon(meta)) {
-                    cambiarPantalla(new PantallaFin(juego, hud.getTiempo()));
-//                  musicaJuego.cerrar();
+                    hiloServidor.enviarMensajeATodos("ElJugador1LlegoALaMetaPosicion-" + contadorPosicion);
+                    posiciones[contadorPosicion] = new PosicionFinal(hud.getTiempo(), hud.getCronometro(), contadorPosicion);
+                    if(contadorPosicion == 1) {
+                        hiloServidor.enviarMensajeATodos("MostrarPantallaFinal-" + hud.getTiempo());
+                        cambiarPantalla(new PantallaFin(juego, hud.getTiempo(), posiciones));
+                    }
+                    else{
+                        cambiarPantalla(new PantallaIntermedia(juego, hud.getTiempo(), posiciones[contadorPosicion]));
+                    }
+//                    musicaJuego.cerrar();
+                    contadorPosicion++;
+                }
+                if (jugador2.colisionaCon(meta)) {
+                    hiloServidor.enviarMensajeATodos("ElJugador2LlegoALaMetaPosicion-" + contadorPosicion);
+                    posiciones[contadorPosicion] = new PosicionFinal(hud.getTiempo(), hud.getCronometro(), contadorPosicion);
+                    if(contadorPosicion == 1) {
+                        hiloServidor.enviarMensajeATodos("MostrarPantallaFinal");
+                        cambiarPantalla(new PantallaFin(juego, hud.getTiempo(), posiciones));
+                    }
+                    else{
+                        cambiarPantalla(new PantallaIntermedia(juego, hud.getTiempo(), posiciones[contadorPosicion]));
+                    }
+//                    musicaJuego.cerrar();
+                    contadorPosicion++;
                 }
             } else if (pausado) {
                 textoPausa.setPosition(

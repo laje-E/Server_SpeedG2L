@@ -10,6 +10,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.g2l.speedg2l.componentes.Boton;
 import com.g2l.speedg2l.componentes.PanelBotones;
 import com.g2l.speedg2l.componentes.Texto;
+import com.g2l.speedg2l.servidor.PosicionFinal;
 import com.g2l.speedg2l.sonidos.EfectoSonido;
 import com.g2l.speedg2l.utilidades.Config;
 import com.g2l.speedg2l.utilidades.Recursos;
@@ -25,7 +26,7 @@ public class PantallaFin extends Pantalla {
     private Texto cronometro;
     private float tiempo;
 
-    public PantallaFin(Game juego, float tiempo) {
+    public PantallaFin(Game juego, float tiempo, PosicionFinal[] posicione) {
         super(juego);
         this.tiempo = tiempo;
     }
