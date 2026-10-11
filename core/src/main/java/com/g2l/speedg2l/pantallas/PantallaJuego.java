@@ -247,9 +247,9 @@ public class PantallaJuego extends Pantalla {
             // Cuando terminan ambos, ya tenemos la clasificación completa.
             if (contadorPosicion > 2) {
                 hiloServidor.enviarMensajeATodos("TODOS_TERMINARON");
-                cambiarPantalla(
-                    new PantallaFin(juego, posiciones)
-                );
+//                cambiarPantalla(
+//                    new PantallaFin(juego, posiciones)
+//                );
             }
         }
     }
