@@ -46,6 +46,9 @@ public class PantallaFin extends Pantalla {
         actualizarResultados(posiciones);
 
         b = Render.batch;
+
+        stage = new Stage(configViewport.getViewport());
+
         efectoMeta = new EfectoSonido(Recursos.EFECTO_META);
         if (Config.isSonidoSilenciado()) {
             efectoMeta.setVolumen(0.0f);
@@ -53,8 +56,6 @@ public class PantallaFin extends Pantalla {
             efectoMeta.setVolumen(Config.getVolumenMaster());
             efectoMeta.reproducir();
         }
-
-//        stage = new Stage(configViewport.getViewport());
 //
 //        cronometro = new Texto(Recursos.FUENTE_MENU, 60, Color.MAROON);
 //
