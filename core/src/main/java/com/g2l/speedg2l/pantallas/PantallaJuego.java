@@ -59,6 +59,7 @@ public class PantallaJuego extends Pantalla {
     private HiloServer hiloServidor;
 
     private PosicionFinal[] posiciones = new PosicionFinal[2];
+    private boolean[] jugadorTermino = new boolean[2];
     private int contadorPosicion = 0;
 
     protected PantallaJuego(Game juego) {
@@ -139,31 +140,11 @@ public class PantallaJuego extends Pantalla {
 //               hiloServidor.almacenarDelta(delta);
 
                 hud.actualizar();
-                if (jugador.colisionaCon(meta)) {
-                    hiloServidor.enviarMensajeATodos("ElJugador1LlegoALaMetaPosicion-" + contadorPosicion);
-                    posiciones[contadorPosicion] = new PosicionFinal(hud.getTiempo(), hud.getCronometro(), contadorPosicion);
-                    if(contadorPosicion == 1) {
-                        hiloServidor.enviarMensajeATodos("MostrarPantallaFinal-" + hud.getTiempo());
-                        cambiarPantalla(new PantallaFin(juego, hud.getTiempo(), posiciones));
-                    }
-                    else{
-                        cambiarPantalla(new PantallaIntermedia(juego, hud.getTiempo(), posiciones[contadorPosicion]));
-                    }
-//                    musicaJuego.cerrar();
-                    contadorPosicion++;
+                if (!jugadorTermino[0] && jugador.colisionaCon(meta)) {
+                    registrarLlegada(1);
                 }
-                if (jugador2.colisionaCon(meta)) {
-                    hiloServidor.enviarMensajeATodos("ElJugador2LlegoALaMetaPosicion-" + contadorPosicion);
-                    posiciones[contadorPosicion] = new PosicionFinal(hud.getTiempo(), hud.getCronometro(), contadorPosicion);
-                    if(contadorPosicion == 1) {
-                        hiloServidor.enviarMensajeATodos("MostrarPantallaFinal");
-                        cambiarPantalla(new PantallaFin(juego, hud.getTiempo(), posiciones));
-                    }
-                    else{
-                        cambiarPantalla(new PantallaIntermedia(juego, hud.getTiempo(), posiciones[contadorPosicion]));
-                    }
-//                    musicaJuego.cerrar();
-                    contadorPosicion++;
+                if (!jugadorTermino[1] && jugador2.colisionaCon(meta)) {
+                    registrarLlegada(2);
                 }
             } else if (pausado) {
                 textoPausa.setPosition(
@@ -242,6 +223,36 @@ public class PantallaJuego extends Pantalla {
         }
     }
 
+
+    private void registrarLlegada(int idJugador) {
+        int indice = idJugador - 1;
+
+        if (!jugadorTermino[indice]) {
+            jugadorTermino[indice] = true;
+
+            posiciones[contadorPosicion - 1] = new PosicionFinal(
+                hud.getTiempo(),
+                contadorPosicion,
+                idJugador
+            );
+
+            hiloServidor.enviarMensajeATodos(
+                "LLEGO-" + idJugador
+                    + "-" + contadorPosicion
+                    + "-" + hud.getTiempo()
+            );
+
+            contadorPosicion++;
+
+            // Cuando terminan ambos, ya tenemos la clasificación completa.
+            if (contadorPosicion > 2) {
+                hiloServidor.enviarMensajeATodos("TODOS_TERMINARON");
+                cambiarPantalla(
+                    new PantallaFin(juego, posiciones)
+                );
+            }
+        }
+    }
 
     @Override
     public void pause() {
