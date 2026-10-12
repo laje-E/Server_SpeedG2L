@@ -50,13 +50,15 @@ public class HiloServer extends Thread{
 
     public void enviarMensajeATodos(String mensaje){
         for(int i=0; i<cantClientes; i++){
-            byte[] data = mensaje.getBytes();
-            DireccionRed direccionCliente = clientes[i].getDireccionRed();
-            DatagramPacket dp = new DatagramPacket(data, data.length, direccionCliente.getIp(), direccionCliente.getPuerto());
-            try {
-                puertoServer.send(dp);
-            }catch (IOException event){
-                event.printStackTrace();
+            if(clientes[i] != null) {
+                byte[] data = mensaje.getBytes();
+                DireccionRed direccionCliente = clientes[i].getDireccionRed();
+                DatagramPacket dp = new DatagramPacket(data, data.length, direccionCliente.getIp(), direccionCliente.getPuerto());
+                try {
+                    puertoServer.send(dp);
+                } catch (IOException event) {
+                    event.printStackTrace();
+                }
             }
         }
     }
@@ -130,7 +132,7 @@ public class HiloServer extends Thread{
             else{
                 enviarMensaje("ERROR-limiteDeClientesAlcanzado", ipPaquete, puertoPaquete);
             }
-        } else{
+        }
             String[] mensajePorPartes = mensaje.split("-");
             int numeroCliente = detectarCliente(ipPaquete, puertoPaquete);
             if(numeroCliente == -1){
@@ -174,6 +176,7 @@ public class HiloServer extends Thread{
                 else if (mensajePorPartes[0].equals("SeSalioDelJuego")){
                     clientes[numeroCliente] = null;
                     int numeroJugador = Integer.parseInt(mensajePorPartes[1]);
+                    cantClientes--;
 
                     System.out.println(
                         "Jugador " + (numeroCliente + 1) +
@@ -186,7 +189,6 @@ public class HiloServer extends Thread{
 
             }
 
-        }
     }
 
     private int buscarEspacioLibre() {
@@ -196,6 +198,7 @@ public class HiloServer extends Thread{
             if (clientes[i] == null) {
                 espacio = i;
             }
+            i++;
         }
 
         return espacio;
@@ -205,9 +208,11 @@ public class HiloServer extends Thread{
         int numeroCliente = -1;
         int i=0;
         while(i<cantClientes && numeroCliente == -1){
-            DireccionRed direccionClienteActual = clientes[i].getDireccionRed();
-            if (ipPaquete.equals(direccionClienteActual.getIp()) && puertoPaquete == direccionClienteActual.getPuerto()){
-                numeroCliente = i;
+            if(clientes[i] != null) {
+                DireccionRed direccionClienteActual = clientes[i].getDireccionRed();
+                if (ipPaquete.equals(direccionClienteActual.getIp()) && puertoPaquete == direccionClienteActual.getPuerto()) {
+                    numeroCliente = i;
+                }
             }
             i++;
         }
