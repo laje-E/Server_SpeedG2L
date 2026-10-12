@@ -7,7 +7,7 @@ import com.g2l.speedg2l.utilidades.Entradas;
 
 import java.util.ArrayList;
 
-public class Jugador extends Entidad{
+public class Jugador extends Entidad {
 
     private final double VELOCIDAD_X = 1;
     private final double VELOCIDAD_Y = 500;
@@ -35,7 +35,7 @@ public class Jugador extends Entidad{
     private final double VELOCIDAD_MINIMA_X = 120;
     private final double PERDIDA_VELOCIDAD = 0.75;
 
-    public Jugador(float ancho , float alto, float posicionX, float posicionY){
+    public Jugador(float ancho, float alto, float posicionX, float posicionY) {
         super(ancho, alto, posicionX, posicionY);
         animacion = new AnimacionEntidad("soldado_corriendo.png", 0.09f, 4, 3);
         animacion.iniciar();
@@ -56,7 +56,7 @@ public class Jugador extends Entidad{
         );
     }
 
-    public void cerrar(){
+    public void cerrar() {
         animacion.cerrar();
     }
 
@@ -75,7 +75,7 @@ public class Jugador extends Entidad{
         }
     }
 
-    public void actualizarFisicas(ArrayList<Entidad> listaDeEntidades, float delta){
+    public void actualizarFisicas(ArrayList<Entidad> listaDeEntidades, float delta) {
 
         actualizarMovimientoVertical(listaDeEntidades, delta);
 
@@ -84,17 +84,15 @@ public class Jugador extends Entidad{
             return;
         }
 
-        if (acelerandoDerecha){
+        if (acelerandoDerecha) {
             acelerarDerecha(listaDeEntidades, delta);
-        }
-        else{
+        } else {
             desAcelerarDerecha(listaDeEntidades, delta);
         }
 
-        if(acelerandoIzquierda){
+        if (acelerandoIzquierda) {
             acelerarIzquierda(listaDeEntidades, delta);
-        }
-        else{
+        } else {
             desAcelerarIzquierda(listaDeEntidades, delta);
         }
     }
@@ -119,20 +117,19 @@ public class Jugador extends Entidad{
                 velocidadYMenosGravedad = 0;
                 saltando = false;
                 rebotando = false;
-            }
-            else {
+            } else {
                 // Está subiendo y golpeó la parte inferior
 
                 velocidadYMenosGravedad = 0;
             }
 
         }
-        if (entidadColisionada == null){
+        if (entidadColisionada == null) {
             // No hay plataforma: continúa moviéndose
             posicionY += desplazamientoY;
         }
 
-        if (entidadColisionada instanceof Lava){
+        if (entidadColisionada instanceof Lava) {
             rebotando = true;
         }
 
@@ -258,11 +255,10 @@ public class Jugador extends Entidad{
 
     }
 
-    protected void variacionVelocidad(double multiplicadorDeVariacion){
-        if (velocidadConAceleracionDerecha > 0){
+    protected void variacionVelocidad(double multiplicadorDeVariacion) {
+        if (velocidadConAceleracionDerecha > 0) {
             velocidadConAceleracionDerecha *= multiplicadorDeVariacion;
-        }
-        else if (velocidadConAceleracionIzquierda > 0){
+        } else if (velocidadConAceleracionIzquierda > 0) {
             velocidadConAceleracionIzquierda *= multiplicadorDeVariacion;
         }
     }
@@ -281,9 +277,9 @@ public class Jugador extends Entidad{
 
         int i = 0;
 
-        while(i<listaDeEntidades.size() && !hayColision){
+        while (i < listaDeEntidades.size() && !hayColision) {
 
-            if(futuraHitbox.overlaps(listaDeEntidades.get(i).getHitbox())){
+            if (futuraHitbox.overlaps(listaDeEntidades.get(i).getHitbox())) {
                 hayColision = true;
                 entidadColisionada = listaDeEntidades.get(i);
             }
@@ -295,10 +291,10 @@ public class Jugador extends Entidad{
     }
 
 
-    private void acelerarDerecha(ArrayList<Entidad> listaDeEntidades, float delta){
-        if(velocidadConAceleracionDerecha < velocidadMaxima){
+    private void acelerarDerecha(ArrayList<Entidad> listaDeEntidades, float delta) {
+        if (velocidadConAceleracionDerecha < velocidadMaxima) {
             this.velocidadConAceleracionDerecha += aceleracion * delta;
-            if(velocidadConAceleracionDerecha > velocidadMaxima){
+            if (velocidadConAceleracionDerecha > velocidadMaxima) {
                 velocidadConAceleracionDerecha = velocidadMaxima;
             }
         }
@@ -313,7 +309,7 @@ public class Jugador extends Entidad{
     private void desAcelerarDerecha(ArrayList<Entidad> listaDeEntidades, float delta) {
         if (velocidadConAceleracionDerecha > 0) {
             velocidadConAceleracionDerecha -= aceleracion * delta;
-            if(velocidadConAceleracionDerecha < 0){
+            if (velocidadConAceleracionDerecha < 0) {
                 velocidadConAceleracionDerecha = 0;
             }
         }
@@ -324,59 +320,59 @@ public class Jugador extends Entidad{
         actualizarHitbox();
     }
 
-    private void acelerarIzquierda (ArrayList < Entidad > listaDeEntidades, float delta) {
-            if (velocidadConAceleracionIzquierda < velocidadMaxima) {
-                velocidadConAceleracionIzquierda += aceleracion * delta;
-                if (velocidadConAceleracionIzquierda > velocidadMaxima){
-                    velocidadConAceleracionIzquierda = velocidadMaxima;
-                }
+    private void acelerarIzquierda(ArrayList<Entidad> listaDeEntidades, float delta) {
+        if (velocidadConAceleracionIzquierda < velocidadMaxima) {
+            velocidadConAceleracionIzquierda += aceleracion * delta;
+            if (velocidadConAceleracionIzquierda > velocidadMaxima) {
+                velocidadConAceleracionIzquierda = velocidadMaxima;
             }
-            double desplazamientoX = velocidadConAceleracionIzquierda * delta;
+        }
+        double desplazamientoX = velocidadConAceleracionIzquierda * delta;
 
-            Entidad entidadColisionada = hayColisionHorizontal(listaDeEntidades, -desplazamientoX);
-            trabajarColisionHorizontal(entidadColisionada, Direccion.IZQUIERDA, desplazamientoX);
-            actualizarHitbox();
+        Entidad entidadColisionada = hayColisionHorizontal(listaDeEntidades, -desplazamientoX);
+        trabajarColisionHorizontal(entidadColisionada, Direccion.IZQUIERDA, desplazamientoX);
+        actualizarHitbox();
     }
 
-    private void desAcelerarIzquierda (ArrayList < Entidad > listaDeEntidades, float delta) {
-            if (velocidadConAceleracionIzquierda > 0) {
-                velocidadConAceleracionIzquierda -= aceleracion * delta;
-                if (velocidadConAceleracionIzquierda < 0){
-                    velocidadConAceleracionIzquierda = 0;
-                }
+    private void desAcelerarIzquierda(ArrayList<Entidad> listaDeEntidades, float delta) {
+        if (velocidadConAceleracionIzquierda > 0) {
+            velocidadConAceleracionIzquierda -= aceleracion * delta;
+            if (velocidadConAceleracionIzquierda < 0) {
+                velocidadConAceleracionIzquierda = 0;
             }
-            double desplazamientoX = velocidadConAceleracionIzquierda * delta;
+        }
+        double desplazamientoX = velocidadConAceleracionIzquierda * delta;
 
-            Entidad entidadColisionada = hayColisionHorizontal(listaDeEntidades, -desplazamientoX);
-            trabajarColisionHorizontal(entidadColisionada, Direccion.IZQUIERDA, desplazamientoX);
-            actualizarHitbox();
+        Entidad entidadColisionada = hayColisionHorizontal(listaDeEntidades, -desplazamientoX);
+        trabajarColisionHorizontal(entidadColisionada, Direccion.IZQUIERDA, desplazamientoX);
+        actualizarHitbox();
     }
 
-    private Entidad hayColisionHorizontal (ArrayList < Entidad > listaDeEntidades,double aceleracion){
+    private Entidad hayColisionHorizontal(ArrayList<Entidad> listaDeEntidades, double aceleracion) {
 
-            boolean hayColision = false;
-            Entidad entidadColisionada = null;
+        boolean hayColision = false;
+        Entidad entidadColisionada = null;
 
-            Rectangle futuraHitbox = new Rectangle(
-                getPosicionX() + (float) aceleracion,
-                getPosicionY(),
-                getAncho(),
-                getAlto()
-            );
+        Rectangle futuraHitbox = new Rectangle(
+            getPosicionX() + (float) aceleracion,
+            getPosicionY(),
+            getAncho(),
+            getAlto()
+        );
 
-            int i = 0;
+        int i = 0;
 
-            while (i < listaDeEntidades.size() && !hayColision) {
+        while (i < listaDeEntidades.size() && !hayColision) {
 
-                if (futuraHitbox.overlaps(listaDeEntidades.get(i).getHitbox())) {
-                    hayColision = true;
-                    entidadColisionada = listaDeEntidades.get(i);
-                }
-
-                i++;
+            if (futuraHitbox.overlaps(listaDeEntidades.get(i).getHitbox())) {
+                hayColision = true;
+                entidadColisionada = listaDeEntidades.get(i);
             }
 
-            return entidadColisionada;
+            i++;
+        }
+
+        return entidadColisionada;
     }
 
 
@@ -385,15 +381,13 @@ public class Jugador extends Entidad{
         switch (direccionMovimiento) {
             case DERECHA:
 
-                if (entidadColisionada == null){
+                if (entidadColisionada == null) {
                     posicionX += desplazamientoX;
-                }
-                else if (entidadColisionada instanceof Plataforma) {
+                } else if (entidadColisionada instanceof Plataforma) {
                     velocidadConAceleracionDerecha = 0;
-                }
-                else if (entidadColisionada instanceof Obstaculo){
+                } else if (entidadColisionada instanceof Obstaculo) {
                     Obstaculo obstaculoColisionado = (Obstaculo) entidadColisionada;
-                    if (obstaculoColisionado.getColisionLateral()){
+                    if (obstaculoColisionado.getColisionLateral()) {
                         obstaculoColisionado.alColisionar(this);
                     }
                 }
@@ -403,15 +397,13 @@ public class Jugador extends Entidad{
 
             case IZQUIERDA:
 
-                if (entidadColisionada == null){
+                if (entidadColisionada == null) {
                     posicionX -= desplazamientoX;
-                }
-                else if (entidadColisionada instanceof Plataforma) {
+                } else if (entidadColisionada instanceof Plataforma) {
                     velocidadConAceleracionIzquierda = 0;
-                }
-                else if (entidadColisionada instanceof Obstaculo){
+                } else if (entidadColisionada instanceof Obstaculo) {
                     Obstaculo obstaculoColisionado = (Obstaculo) entidadColisionada;
-                    if (obstaculoColisionado.getColisionLateral()){
+                    if (obstaculoColisionado.getColisionLateral()) {
                         obstaculoColisionado.alColisionar(this);
                     }
                 }

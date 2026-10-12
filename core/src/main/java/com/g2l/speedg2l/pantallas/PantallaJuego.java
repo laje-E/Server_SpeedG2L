@@ -60,7 +60,7 @@ public class PantallaJuego extends Pantalla {
 
     private PosicionFinal[] posiciones = new PosicionFinal[2];
     private boolean[] jugadorTermino = new boolean[2];
-    private int contadorPosicion = 0;
+    private int contadorPosicion = 1;
 
     protected PantallaJuego(Game juego) {
         super(juego);
