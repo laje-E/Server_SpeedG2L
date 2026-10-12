@@ -103,23 +103,27 @@ public class HiloServer extends Thread{
     private void evaluarMensaje(String mensaje, InetAddress ipPaquete, int puertoPaquete){
         if(mensaje.equals("Conexion")){
             if(cantClientes < 2) {
-                DireccionRed direccionRedParaCliente = new DireccionRed(ipPaquete, puertoPaquete);
-                if (cantClientes == 0) {
-                    clientes[0] = new Cliente(direccionRedParaCliente, jugador1);
-                    System.out.println("Datos cliente nro°" + cantClientes + ": " + direccionRedParaCliente.getIp() + direccionRedParaCliente.getPuerto());
-                    enviarMensaje("OK", direccionRedParaCliente.getIp(), direccionRedParaCliente.getPuerto());
-                    cantClientes++;
-                } else if (cantClientes == 1) {
-                    clientes[1] = new Cliente(direccionRedParaCliente, jugador2);
-                    enviarMensaje("OK", direccionRedParaCliente.getIp(), direccionRedParaCliente.getPuerto());
-                    cantClientes++;
-                }
-                if (cantClientes == 2){
-                    for (int i=0; i<cantClientes; i++){
-                        DireccionRed direccionRedCliente = clientes[i].getDireccionRed();
-                        enviarMensaje("Empezar", direccionRedCliente.getIp(), direccionRedCliente.getPuerto());
-                        enviarMensaje("NumeroJugador-" + Jugadores.values()[i].toString(), direccionRedCliente.getIp(), direccionRedCliente.getPuerto());
-                        PantallaJuego.empezarJuego();
+                int espacio = buscarEspacioLibre();
+
+                if(espacio != -1) {
+                    DireccionRed direccionRedParaCliente = new DireccionRed(ipPaquete, puertoPaquete);
+                    if (espacio == 0) {
+                        clientes[0] = new Cliente(direccionRedParaCliente, jugador1);
+                        System.out.println("Datos cliente nro°" + cantClientes + ": " + direccionRedParaCliente.getIp() + direccionRedParaCliente.getPuerto());
+                        enviarMensaje("OK", direccionRedParaCliente.getIp(), direccionRedParaCliente.getPuerto());
+                        cantClientes++;
+                    } else if (espacio == 1) {
+                        clientes[1] = new Cliente(direccionRedParaCliente, jugador2);
+                        enviarMensaje("OK", direccionRedParaCliente.getIp(), direccionRedParaCliente.getPuerto());
+                        cantClientes++;
+                    }
+                    if (cantClientes == 2) {
+                        for (int i = 0; i < cantClientes; i++) {
+                            DireccionRed direccionRedCliente = clientes[i].getDireccionRed();
+                            enviarMensaje("Empezar", direccionRedCliente.getIp(), direccionRedCliente.getPuerto());
+                            enviarMensaje("NumeroJugador-" + Jugadores.values()[i].toString(), direccionRedCliente.getIp(), direccionRedCliente.getPuerto());
+                            PantallaJuego.empezarJuego();
+                        }
                     }
                 }
             }
@@ -167,12 +171,34 @@ public class HiloServer extends Thread{
 
                     }
                 }
+                else if (mensajePorPartes[0].equals("SeSalioDelJuego")){
+                    clientes[numeroCliente] = null;
+                    int numeroJugador = Integer.parseInt(mensajePorPartes[1]);
+
+                    System.out.println(
+                        "Jugador " + (numeroCliente + 1) +
+                            " desconectado. Jugadores conectados: " +
+                            cantClientes
+                    );
+                }
 
 //                jugadorCliente.actualizarFisicas(listaEntidades, delta);
 
             }
 
         }
+    }
+
+    private int buscarEspacioLibre() {
+        int espacio = -1;
+        int i = 0;
+        while (i < clientes.length && espacio == -1) {
+            if (clientes[i] == null) {
+                espacio = i;
+            }
+        }
+
+        return espacio;
     }
 
     private int detectarCliente(InetAddress ipPaquete, int puertoPaquete) {
