@@ -266,12 +266,13 @@ public class PantallaJuego extends Pantalla {
 
     @Override
     public void hide() {
-
+        if (hiloServidor != null) {
+            hiloServidor.finalizarHilo();
+        }
     }
 
     @Override
     public void dispose() {
-        hiloServidor.finalizarHilo();
         stage.dispose();
         b.dispose();
     //    musicaJuego.cerrar();
