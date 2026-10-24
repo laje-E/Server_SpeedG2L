@@ -67,7 +67,7 @@ public class HiloServer extends Thread{
     public void run() {
         System.out.println("Servidor iniciado. Esperando conexiones...");
 
-        do {
+        while(!fin){
             byte[] data = new byte[1024];
             DatagramPacket dp = new DatagramPacket(data, data.length);
 
@@ -85,7 +85,7 @@ public class HiloServer extends Thread{
 
             procesarMensaje(dp);
 
-        } while(!fin);
+        }
     }
 
 //    private void actualizarFisicasJugadores() {
@@ -238,5 +238,17 @@ public class HiloServer extends Thread{
 
     public void finalizarHilo(){
         fin = true;
+        if (puertoServer != null && !puertoServer.isClosed()) {
+            puertoServer.close();
+        }
     }
+
+    public void restarCantidadClietnes(){
+        this.cantClientes--;
+    }
+
+    public void borrarJugador(int numeroJugador){
+        this.clientes[numeroJugador] = null;
+    }
+
 }

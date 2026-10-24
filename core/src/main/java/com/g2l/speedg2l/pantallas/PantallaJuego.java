@@ -70,6 +70,11 @@ public class PantallaJuego extends Pantalla {
     public void show() {
         b = Render.batch;
 
+        empieza = false;
+        contadorPosicion = 1;
+        jugadorTermino = new boolean[2];
+        posiciones = new PosicionFinal[2];
+
         camara = new Camara(configViewport);
         mapa = new Mapa(Recursos.NIVEL_1);
         entradas = new Entradas();
@@ -142,9 +147,18 @@ public class PantallaJuego extends Pantalla {
                 hud.actualizar();
                 if (!jugadorTermino[0] && jugador.colisionaCon(meta)) {
                     registrarLlegada(1);
+                    hiloServidor.restarCantidadClietnes();
+                    hiloServidor.borrarJugador(0);
                 }
                 if (!jugadorTermino[1] && jugador2.colisionaCon(meta)) {
                     registrarLlegada(2);
+                    hiloServidor.restarCantidadClietnes();
+                    hiloServidor.borrarJugador(1);
+                }
+                if (jugadorTermino[0] && jugadorTermino[1]) {
+                    terminarJuego();
+                    hiloServidor.finalizarHilo();
+                    cambiarPantalla(new PantallaMenu(juego));
                 }
             } else if (pausado) {
                 textoPausa.setPosition(
