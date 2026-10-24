@@ -41,7 +41,7 @@ public class HiloServer extends Thread{
         byte[] data = mensaje.getBytes();
         DatagramPacket dp = new DatagramPacket(data, data.length, ipDestino, puerto);
         try {
-//            System.out.println("Mensaje: " + (new String (dp.getData())).trim());
+//            System.out.println("Mensaje: " + (new String (dp.getData())).tr   im());
             puertoServer.send(dp);
         }catch (IOException event){
             event.printStackTrace();
@@ -206,15 +206,14 @@ public class HiloServer extends Thread{
 
     private int detectarCliente(InetAddress ipPaquete, int puertoPaquete) {
         int numeroCliente = -1;
-        int i=0;
-        while(i<cantClientes && numeroCliente == -1){
+        for (int i = 0; i < clientes.length; i++) {
             if(clientes[i] != null) {
                 DireccionRed direccionClienteActual = clientes[i].getDireccionRed();
                 if (ipPaquete.equals(direccionClienteActual.getIp()) && puertoPaquete == direccionClienteActual.getPuerto()) {
                     numeroCliente = i;
                 }
             }
-            i++;
+
         }
         return numeroCliente;
     }

@@ -147,13 +147,9 @@ public class PantallaJuego extends Pantalla {
                 hud.actualizar();
                 if (!jugadorTermino[0] && jugador.colisionaCon(meta)) {
                     registrarLlegada(1);
-                    hiloServidor.restarCantidadClietnes();
-                    hiloServidor.borrarJugador(0);
                 }
                 if (!jugadorTermino[1] && jugador2.colisionaCon(meta)) {
                     registrarLlegada(2);
-                    hiloServidor.restarCantidadClietnes();
-                    hiloServidor.borrarJugador(1);
                 }
                 if (jugadorTermino[0] && jugadorTermino[1]) {
                     terminarJuego();
