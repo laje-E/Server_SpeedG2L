@@ -67,34 +67,36 @@ public class HiloServer extends Thread{
     public void run() {
         System.out.println("Servidor iniciado. Esperando conexiones...");
 
+
         while(!fin){
+            if(puertoServer == null){
+                System.err.println("El socket del servidor no está disponible.");
+                return;
+            }
             byte[] data = new byte[1024];
             DatagramPacket dp = new DatagramPacket(data, data.length);
 
-            try {
+            try{
                 puertoServer.receive(dp);
-
-//                System.out.println("Recibí un paquete de: "
-//                    + dp.getAddress()
-//                    + ":"
-//                    + dp.getPort());
-
-            } catch (IOException event) {
+            }catch(IOException event){
+                if (puertoServer.isClosed()) {
+                    break;
+                }
                 event.printStackTrace();
+                break;
+            }
+
+            if (puertoServer.isClosed()){
+                break;
             }
 
             procesarMensaje(dp);
-
         }
+
+        System.out.println("HiloServer finalizado.");
     }
 
-//    private void actualizarFisicasJugadores() {
-//        for(int i=0; i<jugadores.length; i++){
-//            jugadores[i].actualizarFisicas();
-//        }
-//    }
-
-    private void procesarMensaje(DatagramPacket dp){
+      private void procesarMensaje(DatagramPacket dp){
         String mensaje = (new String (dp.getData())).trim();
         InetAddress ipPaquete = dp.getAddress();
         int puertoPaquete = dp.getPort();
@@ -185,8 +187,6 @@ public class HiloServer extends Thread{
                     );
                 }
 
-//                jugadorCliente.actualizarFisicas(listaEntidades, delta);
-
             }
 
     }
@@ -227,14 +227,6 @@ public class HiloServer extends Thread{
         this.jugador1 = jugador1;
         this.jugador2 = jugador2;
     }
-
-//    public void almacenarListaEntidades(ArrayList<Entidad> listaDeEntidades) {
-//        this.listaEntidades = listaDeEntidades;
-//    }
-
-//    public void almacenarDelta(float delta) {
-//        this.delta = delta;
-//    }
 
     public void finalizarHilo(){
         fin = true;
