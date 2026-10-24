@@ -189,6 +189,11 @@ public class HiloServer extends Thread{
 
             }
 
+
+            if (mensaje.equals("Hola")) {
+                enviarMensaje("Hola", ipPaquete, puertoPaquete);
+            }
+
     }
 
     private int buscarEspacioLibre() {
