@@ -1,3 +1,4 @@
+
 package com.g2l.speedg2l.pantallas;
 
 import com.badlogic.gdx.Game;
@@ -19,15 +20,12 @@ import com.g2l.speedg2l.utilidades.Render;
 public class PantallaFin extends Pantalla {
 
     private Stage stage;
-    private Boton btnSalir;
     private PanelBotones panelBotones;
     private SpriteBatch b;
-    private EfectoSonido efectoMeta;
-    private Texto cronometro;
-    private float tiempo;
 
-    private PosicionFinal[] posiciones;
+    private EfectoSonido efectoMeta;
     private Texto textoResultados;
+    private PosicionFinal[] posiciones;
 
     public PantallaFin(Game juego, PosicionFinal[] posiciones) {
         super(juego);
@@ -36,6 +34,9 @@ public class PantallaFin extends Pantalla {
 
     @Override
     public void show() {
+        b = Render.batch;
+
+        stage = new Stage(configViewport.getViewport());
 
         textoResultados = new Texto(
             Recursos.FUENTE_MENU,
@@ -45,29 +46,18 @@ public class PantallaFin extends Pantalla {
 
         actualizarResultados(posiciones);
 
-        b = Render.batch;
-
-        stage = new Stage(configViewport.getViewport());
-
         efectoMeta = new EfectoSonido(Recursos.EFECTO_META);
+
         if (Config.isSonidoSilenciado()) {
             efectoMeta.setVolumen(0.0f);
         } else {
             efectoMeta.setVolumen(Config.getVolumenMaster());
             efectoMeta.reproducir();
         }
-//
-//        cronometro = new Texto(Recursos.FUENTE_MENU, 60, Color.MAROON);
-//
-//        int minutos = (int) tiempo / 60;
-//        int segundos = (int) tiempo % 60;
-//        int centesimas = (int) (tiempo * 100) % 100;
-//
-//        cronometro.setTexto("Tiempo final:\n" + "min: " + minutos + " seg: " + segundos + "," + centesimas);
-//
-//        cronometro.centrarArriba(150);
 
-        Skin skin = new Skin(Gdx.files.internal("skin/uiskin.json"));
+        Skin skin = new Skin(
+            Gdx.files.internal("skin/uiskin.json")
+        );
 
         crearPanelBotones(skin);
         agregarAlStage();
@@ -75,29 +65,29 @@ public class PantallaFin extends Pantalla {
     }
 
     private void actualizarResultados(PosicionFinal[] nuevosResultados) {
-        this.posiciones = nuevosResultados;
+        posiciones = nuevosResultados;
 
-        String texto = "RESULTADOS\n\n";
+        StringBuilder resultado = new StringBuilder("RESULTADOS\n\n");
 
-        for (int i = 0; i < posiciones.length; i++) {
-            PosicionFinal resultado = posiciones[i];
+        if (posiciones != null) {
+            for (int i = 0; i < posiciones.length; i++) {
+                PosicionFinal posicion = posiciones[i];
 
-            if (resultado == null) {
-                texto += (i+1) + "° puesto: En carrera\n";
-//                texto.append(i + 1)
-//                    .append("° puesto: En carrera\n");
-            } else {
-                texto += (resultado.getNumeroPosicion()) + "° puesto: Jugador " + (resultado.getIdJugador()) + " - " + (String.format("%.2f s", resultado.getTiempo())) + "\n";
-//                texto.append(resultado.getNumeroPosicion())
-//                    .append("° puesto: Jugador ")
-//                    .append(resultado.getIdJugador())
-//                    .append(" - ")
-//                    .append(String.format("%.2f s", resultado.getTiempo()))
-//                    .append("\n");
+                if (posicion == null) {
+                    resultado.append(i + 1)
+                        .append("° puesto: En carrera\n");
+                } else {
+                    resultado.append(posicion.getNumeroPosicion())
+                        .append("° puesto: Jugador ")
+                        .append(posicion.getIdJugador())
+                        .append(" - ")
+                        .append(String.format("%.2f s", posicion.getTiempo()))
+                        .append("\n");
+                }
             }
         }
 
-        textoResultados.setTexto(texto);
+        textoResultados.setTexto(resultado.toString());
         textoResultados.centrar();
     }
 
@@ -117,7 +107,8 @@ public class PantallaFin extends Pantalla {
                     public void clicked(
                         com.badlogic.gdx.scenes.scene2d.InputEvent event,
                         float x,
-                        float y) {
+                        float y
+                    ) {
                         cambiarPantalla(new PantallaMenu(juego));
                     }
                 },
@@ -133,39 +124,46 @@ public class PantallaFin extends Pantalla {
         Render.limpiarPantalla();
 
         configViewport.aplicarViewport(b);
-        b.begin();
-//        cronometro.dibujar();
-        textoResultados.dibujar();
 
+        b.begin();
+        textoResultados.dibujar();
         b.end();
+
         stage.act(delta);
         stage.draw();
     }
 
     @Override
-    public void pause() {
+    public void resize(int width, int height) {
+        if (stage != null) {
+            stage.getViewport().update(width, height, true);
+        }
+    }
 
+    @Override
+    public void pause() {
     }
 
     @Override
     public void resume() {
-
     }
 
     @Override
     public void hide() {
-
     }
-
 
     @Override
     public void dispose() {
-        stage.dispose();
-        efectoMeta.cerrar();
+        if (stage != null) {
+            stage.dispose();
+        }
+
+        if (efectoMeta != null) {
+            efectoMeta.cerrar();
+        }
     }
 
     private void agregarAlStage() {
         stage.addActor(panelBotones.getContenedor());
     }
-
 }

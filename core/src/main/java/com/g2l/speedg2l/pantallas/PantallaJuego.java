@@ -35,12 +35,15 @@ public class PantallaJuego extends Pantalla {
     private Jugador jugador;
     private Jugador jugador2;
     private SpriteBatch b;
+    private Musica musicaJuego;
     private Hud hud;
 
     private Pincho pincho;
     private Imagen imgPincho;
 
     private ArrayList<Entidad> listaDeEntidades;
+
+    private ArrayList<Obstaculo> listaDeObstaculos;
 
     private Mapa mapa;
     private Camara camara;
@@ -74,12 +77,14 @@ public class PantallaJuego extends Pantalla {
         contadorPosicion = 1;
         jugadorTermino = new boolean[2];
         posiciones = new PosicionFinal[2];
+        crearYaplicarMusica();
 
         camara = new Camara(configViewport);
         mapa = new Mapa(Recursos.NIVEL_1);
         entradas = new Entradas();
-        jugador = new Jugador(70.0f, 70.0f, 0.0f, 33.0f);
-        jugador2 = new Jugador(70.0f, 70.0f, 25.0f, 33.0f);
+
+        jugador = new Jugador(70.0f, 70.0f, 0.0f, 33.0f, Recursos.JUGADOR_1);
+        jugador2 = new Jugador(70.0f, 70.0f, 25.0f, 33.0f, Recursos.JUGADOR_2);
         hud = new Hud();
 
         meta = new Meta(50.0f, 1000.0f, 8000.0f, 100.0f);
@@ -90,6 +95,8 @@ public class PantallaJuego extends Pantalla {
 
         textoEspera.setTexto("Esperando jugador");
         textoEspera.centrar();
+
+        listaDeObstaculos = new ArrayList<>();
 
         cargarColisionesDesdeMapa();
 
@@ -108,6 +115,25 @@ public class PantallaJuego extends Pantalla {
     private void crearYConfigurarHiloServer() {
         hiloServidor = new HiloServer();
         hiloServidor.almacenarJugadores(jugador, jugador2);
+    }
+
+    private void crearYaplicarMusica() {
+
+        if (Render.musicaJuego == null) {
+            Render.musicaJuego = new Musica(Recursos.MUSICA_JUEGO);
+            Render.musicaJuego.repetir(true);
+        }
+        if (Config.isSonidoSilenciado()) {
+            Render.musicaJuego.setVolumen(0.0f);
+        } else {
+            Render.musicaJuego.setVolumen(Config.getVolumenMaster());
+        }
+
+        musicaJuego = Render.musicaJuego;
+
+        if (!musicaJuego.estaReproduciendo()) {
+            musicaJuego.reproducir();
+        }
     }
 
     @Override
@@ -226,12 +252,18 @@ public class PantallaJuego extends Pantalla {
                                 Plataforma bloque = new Plataforma(tileAncho, tileAlto, x * tileAncho, y * tileAlto);
                                 listaDeEntidades.add(bloque);
                             }
+
+                            if (propiedades.containsKey("mortal") && propiedades.get("mortal", Boolean.class)) {
+                                Lava lava = new Lava(tileAncho, tileAlto, x * tileAncho, y * tileAlto);
+                                listaDeObstaculos.add(lava);
+                            }
                         }
                     }
                 }
             }
         }
     }
+
 
 
     private void registrarLlegada(int idJugador) {
@@ -285,7 +317,7 @@ public class PantallaJuego extends Pantalla {
     public void dispose() {
         stage.dispose();
         b.dispose();
-    //    musicaJuego.cerrar();
+        // musicaJuego.cerrar();
         Render.musicaJuego = null;
         jugador.cerrar();
     }

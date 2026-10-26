@@ -8,6 +8,7 @@ public class Lwjgl3Launcher {
 
     public static final String TITULO = "SpeedG2L - Server";
 
+
     public static void main(String[] args) {
         if (StartupHelper.startNewJvmIfRequired()) return;
         createApplication();

@@ -35,9 +35,17 @@ public class Jugador extends Entidad {
     private final double VELOCIDAD_MINIMA_X = 120;
     private final double PERDIDA_VELOCIDAD = 0.75;
 
-    public Jugador(float ancho, float alto, float posicionX, float posicionY) {
+
+    private final float DURACION_EFECTO_LAVA = 0.5f;
+    private final double REBOTE_LAVA = 350;
+    private final float DURACION_RALENTIZACION = 5.0f;
+    private final double VELOCIDAD_MAX_RALENTIZADO = 100;
+    private float tiempoRalentizacion = 0;
+    private float tiempoEfectoLava = 0;
+
+    public Jugador(float ancho , float alto, float posicionX, float posicionY, String ruta){
         super(ancho, alto, posicionX, posicionY);
-        animacion = new AnimacionEntidad("soldado_corriendo.png", 0.09f, 4, 3);
+        animacion = new AnimacionEntidad(ruta, 0.09f, 4, 3);
         animacion.iniciar();
     }
 
@@ -80,7 +88,7 @@ public class Jugador extends Entidad {
         actualizarMovimientoVertical(listaDeEntidades, delta);
 
         if (rebotando) {
-            actualizarRebote(listaDeEntidades, delta);
+//            actualizarRebote(listaDeEntidades, delta);
             return;
         }
 
@@ -118,19 +126,20 @@ public class Jugador extends Entidad {
                 saltando = false;
                 rebotando = false;
             } else {
+            }
                 // Está subiendo y golpeó la parte inferior
 
                 velocidadYMenosGravedad = 0;
             }
 
-        }
         if (entidadColisionada == null) {
             // No hay plataforma: continúa moviéndose
             posicionY += desplazamientoY;
         }
 
+
         if (entidadColisionada instanceof Lava) {
-            rebotando = true;
+            aplicarEfectoLava();
         }
 
         // Evitar atravesar el suelo
@@ -144,121 +153,147 @@ public class Jugador extends Entidad {
     }
 
 
-    public void iniciarRebote() {
-        if (rebotando) {
-            return;
+//<<<<<<< HEAD
+//    public void iniciarRebote() {
+//        if (rebotando) {
+//            return;
+//        }
+//
+//        rebotando = true;
+//
+//        // Bloquear los controles.
+//        acelerandoDerecha = false;
+//        acelerandoIzquierda = false;
+//
+//        // Determinar la dirección anterior.
+//        if (velocidadConAceleracionDerecha >
+//            velocidadConAceleracionIzquierda) {
+//
+//            velocidadReboteX =
+//                Math.max(velocidadConAceleracionDerecha,
+//                    VELOCIDAD_MINIMA_X);
+//
+//        } else if (velocidadConAceleracionIzquierda >
+//            velocidadConAceleracionDerecha) {
+//
+//            velocidadReboteX =
+//                -Math.max(velocidadConAceleracionIzquierda,
+//                    VELOCIDAD_MINIMA_X);
+//
+//        } else {
+//            // Si estaba quieto, elegir una dirección inicial.
+//            velocidadReboteX = VELOCIDAD_MINIMA_X;
+//        }
+//
+//        velocidadReboteY = FUERZA_REBOTE_Y;
+//
+//        velocidadConAceleracionDerecha = 0;
+//        velocidadConAceleracionIzquierda = 0;
+//
+//        saltando = true;
+//    }
+//
+//    private void rebotar() {
+//
+//        // Reducir la velocidad horizontal sin invertir la dirección.
+//        double direccion = Math.signum(velocidadReboteX);
+//
+//        velocidadReboteX =
+//            direccion * Math.max(
+//                Math.abs(velocidadReboteX) * PERDIDA_VELOCIDAD,
+//                VELOCIDAD_MINIMA_X
+//            );
+//
+//        // Volver a impulsarlo hacia arriba con menos fuerza.
+//        velocidadReboteY = Math.max(
+//            Math.abs(velocidadReboteY) * PERDIDA_VELOCIDAD,
+//            180
+//        );
+//    }
+//
+//    private void actualizarRebote(
+//        ArrayList<Entidad> listaDeEntidades,
+//        float delta
+//    ) {
+//
+//        rebotar();
+//
+//        // Mover horizontalmente.
+//        double desplazamientoX = velocidadReboteX * delta;
+//
+//        Entidad entidadX =
+//            hayColisionHorizontal(listaDeEntidades, desplazamientoX);
+//
+//        if (entidadX == null) {
+//            posicionX += desplazamientoX;
+//        } else if (entidadX instanceof Plataforma) {
+//            velocidadReboteX = 0;
+//        }
+//
+//        // Mover verticalmente.
+//        double desplazamientoY = velocidadReboteY * delta;
+//
+//        Entidad entidadY =
+//            hayColisionVertical(listaDeEntidades, desplazamientoY);
+//
+//        if (entidadY instanceof Plataforma) {
+//            if (desplazamientoY < 0) {
+//                posicionY = entidadY.getPosicionY()
+//                    + entidadY.getAlto();
+//
+//                velocidadReboteY = 0;
+//                rebotando = false;
+//            } else {
+//                velocidadReboteY = 0;
+//            }
+//        } else if (entidadY == null) {
+//            posicionY += desplazamientoY;
+//        }
+//
+//        // Mantener al jugador dentro del suelo.
+//        if (posicionY <= posicionSuelo) {
+//            posicionY = posicionSuelo;
+//
+//            if (Math.abs(velocidadReboteY) < 180) {
+//                velocidadReboteY = 180;
+//            } else {
+//                velocidadReboteY = 0;
+//            }
+//        }
+//
+//        actualizarHitbox();
+//
+//    }
+//
+//    protected void variacionVelocidad(double multiplicadorDeVariacion) {
+//        if (velocidadConAceleracionDerecha > 0) {
+//            velocidadConAceleracionDerecha *= multiplicadorDeVariacion;
+//        } else if (velocidadConAceleracionIzquierda > 0) {
+//=======
+    protected void rebotar(ArrayList<Entidad> listaDeEntidades, float delta){
+        actualizarMovimientoVertical(listaDeEntidades, delta);
+        if (velocidadConAceleracionDerecha > 5){
+            variacionVelocidad(0.5);
         }
-
-        rebotando = true;
-
-        // Bloquear los controles.
-        acelerandoDerecha = false;
-        acelerandoIzquierda = false;
-
-        // Determinar la dirección anterior.
-        if (velocidadConAceleracionDerecha >
-            velocidadConAceleracionIzquierda) {
-
-            velocidadReboteX =
-                Math.max(velocidadConAceleracionDerecha,
-                    VELOCIDAD_MINIMA_X);
-
-        } else if (velocidadConAceleracionIzquierda >
-            velocidadConAceleracionDerecha) {
-
-            velocidadReboteX =
-                -Math.max(velocidadConAceleracionIzquierda,
-                    VELOCIDAD_MINIMA_X);
-
-        } else {
-            // Si estaba quieto, elegir una dirección inicial.
-            velocidadReboteX = VELOCIDAD_MINIMA_X;
+        else if (velocidadConAceleracionDerecha > 0){
+            velocidadConAceleracionDerecha = 2.5;
         }
-
-        velocidadReboteY = FUERZA_REBOTE_Y;
-
-        velocidadConAceleracionDerecha = 0;
-        velocidadConAceleracionIzquierda = 0;
-
-        saltando = true;
+        else if (velocidadConAceleracionIzquierda > 5){
+            variacionVelocidad(0.5);
+        }
+        else if (velocidadConAceleracionIzquierda > 0){
+            velocidadConAceleracionIzquierda = 5;
+        }
+        else if (velocidadConAceleracionIzquierda == 0 && velocidadConAceleracionDerecha == 0){
+            velocidadConAceleracionDerecha = 2.5;
+        }
     }
 
-    private void rebotar() {
-
-        // Reducir la velocidad horizontal sin invertir la dirección.
-        double direccion = Math.signum(velocidadReboteX);
-
-        velocidadReboteX =
-            direccion * Math.max(
-                Math.abs(velocidadReboteX) * PERDIDA_VELOCIDAD,
-                VELOCIDAD_MINIMA_X
-            );
-
-        // Volver a impulsarlo hacia arriba con menos fuerza.
-        velocidadReboteY = Math.max(
-            Math.abs(velocidadReboteY) * PERDIDA_VELOCIDAD,
-            180
-        );
-    }
-
-    private void actualizarRebote(
-        ArrayList<Entidad> listaDeEntidades,
-        float delta
-    ) {
-
-        rebotar();
-
-        // Mover horizontalmente.
-        double desplazamientoX = velocidadReboteX * delta;
-
-        Entidad entidadX =
-            hayColisionHorizontal(listaDeEntidades, desplazamientoX);
-
-        if (entidadX == null) {
-            posicionX += desplazamientoX;
-        } else if (entidadX instanceof Plataforma) {
-            velocidadReboteX = 0;
-        }
-
-        // Mover verticalmente.
-        double desplazamientoY = velocidadReboteY * delta;
-
-        Entidad entidadY =
-            hayColisionVertical(listaDeEntidades, desplazamientoY);
-
-        if (entidadY instanceof Plataforma) {
-            if (desplazamientoY < 0) {
-                posicionY = entidadY.getPosicionY()
-                    + entidadY.getAlto();
-
-                velocidadReboteY = 0;
-                rebotando = false;
-            } else {
-                velocidadReboteY = 0;
-            }
-        } else if (entidadY == null) {
-            posicionY += desplazamientoY;
-        }
-
-        // Mantener al jugador dentro del suelo.
-        if (posicionY <= posicionSuelo) {
-            posicionY = posicionSuelo;
-
-            if (Math.abs(velocidadReboteY) < 180) {
-                velocidadReboteY = 180;
-            } else {
-                velocidadReboteY = 0;
-            }
-        }
-
-        actualizarHitbox();
-
-    }
-
-    protected void variacionVelocidad(double multiplicadorDeVariacion) {
-        if (velocidadConAceleracionDerecha > 0) {
+    protected void variacionVelocidad(double multiplicadorDeVariacion){
+        if (velocidadConAceleracionDerecha > 0){
             velocidadConAceleracionDerecha *= multiplicadorDeVariacion;
-        } else if (velocidadConAceleracionIzquierda > 0) {
+        }
+        else if (velocidadConAceleracionIzquierda > 0){
             velocidadConAceleracionIzquierda *= multiplicadorDeVariacion;
         }
     }
@@ -289,7 +324,6 @@ public class Jugador extends Entidad {
 
         return entidadColisionada;
     }
-
 
     private void acelerarDerecha(ArrayList<Entidad> listaDeEntidades, float delta) {
         if (velocidadConAceleracionDerecha < velocidadMaxima) {
@@ -380,7 +414,6 @@ public class Jugador extends Entidad {
 
         switch (direccionMovimiento) {
             case DERECHA:
-
                 if (entidadColisionada == null) {
                     posicionX += desplazamientoX;
                 } else if (entidadColisionada instanceof Plataforma) {
@@ -396,7 +429,6 @@ public class Jugador extends Entidad {
 
 
             case IZQUIERDA:
-
                 if (entidadColisionada == null) {
                     posicionX -= desplazamientoX;
                 } else if (entidadColisionada instanceof Plataforma) {
@@ -414,4 +446,15 @@ public class Jugador extends Entidad {
         return getHitbox().overlaps(entidad.getHitbox());
     }
 
+
+    public void aplicarEfectoLava() {
+        tiempoRalentizacion = DURACION_RALENTIZACION;
+
+        if (tiempoEfectoLava > 0) {
+            return;
+        }
+        velocidadYMenosGravedad = REBOTE_LAVA;
+        saltando = true;
+        tiempoEfectoLava = DURACION_EFECTO_LAVA;
+    }
 }
