@@ -164,9 +164,9 @@ public class PantallaJuego extends Pantalla {
 
             if (!pausado) {
                   jugador.actualizarFisicas(listaDeEntidades, delta);
-//                jugador.animar(delta);
+                  jugador.animar(delta);
                   jugador2.actualizarFisicas(listaDeEntidades, delta);
-//                jugador2.animar3(delta);
+                  jugador2.animar(delta);
 
 //               hiloServidor.almacenarDelta(delta);
 
@@ -255,7 +255,7 @@ public class PantallaJuego extends Pantalla {
 
                             if (propiedades.containsKey("mortal") && propiedades.get("mortal", Boolean.class)) {
                                 Lava lava = new Lava(tileAncho, tileAlto, x * tileAncho, y * tileAlto);
-                                listaDeObstaculos.add(lava);
+                                listaDeEntidades.add(lava);
                             }
                         }
                     }

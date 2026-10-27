@@ -22,7 +22,7 @@ public class Jugador extends Entidad {
     private double aceleracion = 80;
     private boolean acelerandoDerecha = false;
     private boolean acelerandoIzquierda = false;
-    private final double velocidadMaxima = 1000;
+    private final double VELOCIDAD_MAXIMA = 1000;
     private AnimacionEntidad animacion;
     boolean saltando = false;
 
@@ -42,6 +42,8 @@ public class Jugador extends Entidad {
     private final double VELOCIDAD_MAX_RALENTIZADO = 100;
     private float tiempoRalentizacion = 0;
     private float tiempoEfectoLava = 0;
+
+    private double limiteVelocidad = 0;
 
     public Jugador(float ancho , float alto, float posicionX, float posicionY, String ruta){
         super(ancho, alto, posicionX, posicionY);
@@ -85,7 +87,11 @@ public class Jugador extends Entidad {
 
     public void actualizarFisicas(ArrayList<Entidad> listaDeEntidades, float delta) {
 
+        actualizarTemporizadorLava(delta);
+
         actualizarMovimientoVertical(listaDeEntidades, delta);
+
+        asignarLimiteVelocidad();
 
         if (rebotando) {
 //            actualizarRebote(listaDeEntidades, delta);
@@ -102,6 +108,15 @@ public class Jugador extends Entidad {
             acelerarIzquierda(listaDeEntidades, delta);
         } else {
             desAcelerarIzquierda(listaDeEntidades, delta);
+        }
+    }
+
+    private void asignarLimiteVelocidad() {
+        if(tiempoEfectoLava > 0){
+            limiteVelocidad = VELOCIDAD_MAX_RALENTIZADO;
+        }
+        else{
+            limiteVelocidad = VELOCIDAD_MAXIMA;
         }
     }
 
@@ -135,6 +150,7 @@ public class Jugador extends Entidad {
         if (entidadColisionada == null) {
             // No hay plataforma: continúa moviéndose
             posicionY += desplazamientoY;
+            saltando = true;
         }
 
 
@@ -326,10 +342,10 @@ public class Jugador extends Entidad {
     }
 
     private void acelerarDerecha(ArrayList<Entidad> listaDeEntidades, float delta) {
-        if (velocidadConAceleracionDerecha < velocidadMaxima) {
+        if (velocidadConAceleracionDerecha < limiteVelocidad) {
             this.velocidadConAceleracionDerecha += aceleracion * delta;
-            if (velocidadConAceleracionDerecha > velocidadMaxima) {
-                velocidadConAceleracionDerecha = velocidadMaxima;
+            if (velocidadConAceleracionDerecha > limiteVelocidad) {
+                velocidadConAceleracionDerecha = limiteVelocidad;
             }
         }
         double desplazamientoX = velocidadConAceleracionDerecha * delta;
@@ -355,10 +371,10 @@ public class Jugador extends Entidad {
     }
 
     private void acelerarIzquierda(ArrayList<Entidad> listaDeEntidades, float delta) {
-        if (velocidadConAceleracionIzquierda < velocidadMaxima) {
+        if (velocidadConAceleracionIzquierda < limiteVelocidad) {
             velocidadConAceleracionIzquierda += aceleracion * delta;
-            if (velocidadConAceleracionIzquierda > velocidadMaxima) {
-                velocidadConAceleracionIzquierda = velocidadMaxima;
+            if (velocidadConAceleracionIzquierda > limiteVelocidad) {
+                velocidadConAceleracionIzquierda = limiteVelocidad;
             }
         }
         double desplazamientoX = velocidadConAceleracionIzquierda * delta;
@@ -449,12 +465,12 @@ public class Jugador extends Entidad {
 
     public void aplicarEfectoLava() {
         tiempoRalentizacion = DURACION_RALENTIZACION;
-
-        if (tiempoEfectoLava > 0) {
-            return;
-        }
         velocidadYMenosGravedad = REBOTE_LAVA;
         saltando = true;
         tiempoEfectoLava = DURACION_EFECTO_LAVA;
+    }
+
+    private void actualizarTemporizadorLava(float delta) {
+        if (tiempoEfectoLava > 0) tiempoEfectoLava -= delta;
     }
 }

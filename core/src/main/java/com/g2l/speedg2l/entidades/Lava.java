@@ -14,7 +14,7 @@ public class Lava extends Obstaculo {
 
     @Override
     public void asignarTipoDeColision() {
-        colisionLateral = false;
-        colisionVertical = false;
+        colisionLateral = true;
+        colisionVertical = true;
     }
 }
