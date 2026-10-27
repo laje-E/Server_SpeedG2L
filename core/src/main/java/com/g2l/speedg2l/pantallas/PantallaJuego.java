@@ -164,11 +164,8 @@ public class PantallaJuego extends Pantalla {
 
             if (!pausado) {
                   jugador.actualizarFisicas(listaDeEntidades, delta);
-//                jugador.animar(delta);
                   jugador2.actualizarFisicas(listaDeEntidades, delta);
-//                jugador2.animar3(delta);
-
-//               hiloServidor.almacenarDelta(delta);
+                  hiloServidor.realizarBroadcastJuego();
 
                 hud.actualizar();
                 if (!jugadorTermino[0] && jugador.colisionaCon(meta)) {
@@ -263,8 +260,6 @@ public class PantallaJuego extends Pantalla {
             }
         }
     }
-
-
 
     private void registrarLlegada(int idJugador) {
         int indice = idJugador - 1;

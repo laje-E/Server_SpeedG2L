@@ -64,6 +64,20 @@ public class HiloServer extends Thread{
         }
     }
 
+
+    public void realizarBroadcastJuego() {
+        for(int i = 0; i < clientes.length; i++) {
+            if(clientes[i] != null) {
+                Jugador jugadorCliente = clientes[i].getJugador();
+                enviarMensajeAtodos("Movimiento-" +
+                        jugadorCliente.getPosicionX() + "-" +
+                        jugadorCliente.getPosicionY() + "-" +
+                        Jugadores.values()[i]
+                );
+            }
+        }
+    }
+
     @Override
     public void run() {
         System.out.println("Servidor iniciado. Esperando conexiones...");
@@ -144,34 +158,34 @@ public class HiloServer extends Thread{
                 if (mensajePorPartes[0].equals("Aprete")) {
                     if (mensajePorPartes[1].equals("Izquierda")) {
                         jugadorCliente.moverIzquierda(true);
-                        enviarMensajeAtodos("Movimiento-" + jugadorCliente.getPosicionX() + "-" +
-                            jugadorCliente.getPosicionY() + "-" + Jugadores.values()[numeroCliente]);
+//                        enviarMensajeAtodos("Movimiento-" + jugadorCliente.getPosicionX() + "-" +
+//                            jugadorCliente.getPosicionY() + "-" + Jugadores.values()[numeroCliente]);
 
                     } else if (mensajePorPartes[1].equals("Derecha")) {
 
                         jugadorCliente.moverDerecha(true);
-                        enviarMensajeAtodos("Movimiento-" + jugadorCliente.getPosicionX() + "-" +
-                            jugadorCliente.getPosicionY() + "-" + Jugadores.values()[numeroCliente]);
+//                        enviarMensajeAtodos("Movimiento-" + jugadorCliente.getPosicionX() + "-" +
+//                            jugadorCliente.getPosicionY() + "-" + Jugadores.values()[numeroCliente]);
 
                     } else if (mensajePorPartes[1].equals("Arriba")) {
 
                         jugadorCliente.saltar();
-                        enviarMensajeAtodos("Movimiento-" + jugadorCliente.getPosicionX() + "-" +
-                            jugadorCliente.getPosicionY() + "-" + Jugadores.values()[numeroCliente]);
+//                        enviarMensajeAtodos("Movimiento-" + jugadorCliente.getPosicionX() + "-" +
+//                            jugadorCliente.getPosicionY() + "-" + Jugadores.values()[numeroCliente]);
 
                     }
                 } else if (mensajePorPartes[0].equals("NoAprete")) {
                     if (mensajePorPartes[1].equals("Izquierda")) {
 
                         jugadorCliente.moverIzquierda(false);
-                        enviarMensajeAtodos("Movimiento-" + jugadorCliente.getPosicionX() + "-" +
-                            jugadorCliente.getPosicionY() + "-" + Jugadores.values()[numeroCliente]);
+//                        enviarMensajeAtodos("Movimiento-" + jugadorCliente.getPosicionX() + "-" +
+//                            jugadorCliente.getPosicionY() + "-" + Jugadores.values()[numeroCliente]);
 
                     } else if (mensajePorPartes[1].equals("Derecha")) {
 
                         jugadorCliente.moverDerecha(false);
-                        enviarMensajeAtodos("Movimiento-" + jugadorCliente.getPosicionX() + "-" +
-                            jugadorCliente.getPosicionY() + "-" + Jugadores.values()[numeroCliente]);
+//                        enviarMensajeAtodos("Movimiento-" + jugadorCliente.getPosicionX() + "-" +
+//                            jugadorCliente.getPosicionY() + "-" + Jugadores.values()[numeroCliente]);
 
                     }
                 }
