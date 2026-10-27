@@ -278,7 +278,7 @@ public class PantallaJuego extends Pantalla {
                 idJugador
             );
 
-            hiloServidor.enviarMensajeATodos(
+            hiloServidor.enviarMensajeAtodos(
                 "LLEGO-" + idJugador
                     + "-" + contadorPosicion
                     + "-" + hud.getTiempo()
@@ -288,7 +288,7 @@ public class PantallaJuego extends Pantalla {
 
             // Cuando terminan ambos, ya tenemos la clasificación completa.
             if (contadorPosicion > 2) {
-                hiloServidor.enviarMensajeATodos("TODOS_TERMINARON");
+                hiloServidor.enviarMensajeAtodos("TODOS_TERMINARON");
 //                cambiarPantalla(
 //                    new PantallaFin(juego, posiciones)
 //                );
