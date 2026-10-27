@@ -1,7 +1,5 @@
 package com.g2l.speedg2l.pantallas;
 
-
-
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
