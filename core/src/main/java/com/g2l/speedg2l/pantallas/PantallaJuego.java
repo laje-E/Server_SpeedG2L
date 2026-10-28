@@ -63,6 +63,8 @@ public class PantallaJuego extends Pantalla {
     private boolean[] jugadorTermino = new boolean[2];
     private int contadorPosicion = 1;
 
+    private boolean terminarJuego = false;
+
     protected PantallaJuego(Game juego) {
         super(juego);
     }
@@ -182,7 +184,7 @@ public class PantallaJuego extends Pantalla {
                 if (jugadorTermino[0] && jugadorTermino[1]) {
                     terminarJuego();
                     hiloServidor.finalizarHilo();
-                    cambiarPantalla(new PantallaMenu(juego));
+                    terminarJuego = true;
                 }
             } else if (pausado) {
                 textoPausa.setPosition(
@@ -212,6 +214,11 @@ public class PantallaJuego extends Pantalla {
 
             stage.act(delta);
             stage.draw();
+
+            if(terminarJuego){
+                cambiarPantalla(new PantallaMenu(juego));
+            }
+
         }
     }
 
@@ -316,7 +323,7 @@ public class PantallaJuego extends Pantalla {
     @Override
     public void dispose() {
         stage.dispose();
-        b.dispose();
+//        b.dispose();
         // musicaJuego.cerrar();
         Render.musicaJuego = null;
         jugador.cerrar();

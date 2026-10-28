@@ -112,11 +112,18 @@ public class Jugador extends Entidad {
     }
 
     private void asignarLimiteVelocidad() {
-        if(tiempoEfectoLava > 0){
+        if (tiempoRalentizacion > 0) {
             limiteVelocidad = VELOCIDAD_MAX_RALENTIZADO;
-        }
-        else{
+        } else {
             limiteVelocidad = VELOCIDAD_MAXIMA;
+        }
+
+        // Recortar la velocidad actual si supera el límite
+        if (velocidadConAceleracionDerecha > limiteVelocidad) {
+            velocidadConAceleracionDerecha = limiteVelocidad;
+        }
+        if (velocidadConAceleracionIzquierda > limiteVelocidad) {
+            velocidadConAceleracionIzquierda = limiteVelocidad;
         }
     }
 
@@ -465,6 +472,10 @@ public class Jugador extends Entidad {
 
     public void aplicarEfectoLava() {
         tiempoRalentizacion = DURACION_RALENTIZACION;
+
+        if (tiempoEfectoLava > 0) {
+            return;
+        }
         velocidadYMenosGravedad = REBOTE_LAVA;
         saltando = true;
         tiempoEfectoLava = DURACION_EFECTO_LAVA;
@@ -472,5 +483,6 @@ public class Jugador extends Entidad {
 
     private void actualizarTemporizadorLava(float delta) {
         if (tiempoEfectoLava > 0) tiempoEfectoLava -= delta;
+        if (tiempoRalentizacion > 0) tiempoRalentizacion -= delta;
     }
 }
