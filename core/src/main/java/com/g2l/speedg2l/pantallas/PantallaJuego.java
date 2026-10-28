@@ -215,7 +215,7 @@ public class PantallaJuego extends Pantalla {
             stage.act(delta);
             stage.draw();
 
-            if(terminarJuego){
+            if(terminarJuego || hiloServidor.isFin() || hiloServidor.isClienteDesconectado()){
                 cambiarPantalla(new PantallaMenu(juego));
             }
 
@@ -278,6 +278,7 @@ public class PantallaJuego extends Pantalla {
 
         if (!jugadorTermino[indice]) {
             jugadorTermino[indice] = true;
+            hiloServidor.setJugadorTerminado(indice);
 
             posiciones[contadorPosicion - 1] = new PosicionFinal(
                 hud.getTiempo(),

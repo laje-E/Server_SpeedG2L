@@ -26,15 +26,33 @@ public class HiloServer extends Thread{
 
 //    private float delta;
 
+    private boolean clienteConfirmado = false;
+
+    private final int  TIEMPO_ESPERA_RECEIVE = 500;
+    private final long TIMEOUT_CLIENTE       = 5000;
+
+    private long[] ultimoContacto = new long[2];
+    private boolean[] terminado   = new boolean[2];   // jugadores que ya llegaron a la meta
+
+    private volatile boolean partidaEnCurso = false;
+    private volatile boolean partidaCancelada = false;
+
+    private boolean clienteDesconectado = false;
+
     public HiloServer(){
         clientes = new Cliente[2];
 //      listaEntidades = new ArrayList<>();
         try {
             direccionServer = InetAddress.getByName("255.255.255.255");
             puertoServer = new DatagramSocket(6412);
+//            puertoServer.setSoTimeout(TIEMPO_ESPERA_RECEIVE);
         }catch (SocketException | UnknownHostException evento){
             evento.printStackTrace();
         }
+    }
+
+    public boolean isClienteConfirmado() {
+        return clienteConfirmado;
     }
 
     public void enviarMensaje(String mensaje, InetAddress ipDestino, int puerto){
@@ -82,7 +100,7 @@ public class HiloServer extends Thread{
     public void run() {
         System.out.println("Servidor iniciado. Esperando conexiones...");
 
-        while(!fin){
+        while(!fin && puertoServer != null && !puertoServer.isClosed()){
             if(puertoServer == null){
                 System.err.println("El socket del servidor no está disponible.");
                 fin=true;
@@ -92,6 +110,7 @@ public class HiloServer extends Thread{
 
             try{
                 puertoServer.receive(dp);
+                procesarMensaje(dp);
             }catch(IOException event){
                 if (puertoServer.isClosed()) {
                     break;
@@ -104,7 +123,8 @@ public class HiloServer extends Thread{
                 break;
             }
 
-            procesarMensaje(dp);
+            revisarTimeouts();
+
         }
 
         System.out.println("\n\nHiloServer finalizado.");
@@ -119,6 +139,12 @@ public class HiloServer extends Thread{
     }
 
     private void evaluarMensaje(String mensaje, InetAddress ipPaquete, int puertoPaquete){
+
+        int numeroCliente = detectarCliente(ipPaquete, puertoPaquete);
+        if (numeroCliente != -1) {
+            ultimoContacto[numeroCliente] = System.currentTimeMillis();
+        }
+
         if(mensaje.equals("Conexion")){
             if(cantClientes < 2) {
                 int espacio = buscarEspacioLibre();
@@ -127,11 +153,13 @@ public class HiloServer extends Thread{
                     DireccionRed direccionRedParaCliente = new DireccionRed(ipPaquete, puertoPaquete);
                     if (espacio == 0) {
                         clientes[0] = new Cliente(direccionRedParaCliente, jugador1);
+                        ultimoContacto[0] = System.currentTimeMillis();
                         System.out.println("Datos cliente nro°" + cantClientes + ": " + direccionRedParaCliente.getIp() + direccionRedParaCliente.getPuerto());
                         enviarMensaje("OK", direccionRedParaCliente.getIp(), direccionRedParaCliente.getPuerto());
                         cantClientes++;
                     } else if (espacio == 1) {
                         clientes[1] = new Cliente(direccionRedParaCliente, jugador2);
+                        ultimoContacto[1] = System.currentTimeMillis();
                         enviarMensaje("OK", direccionRedParaCliente.getIp(), direccionRedParaCliente.getPuerto());
                         cantClientes++;
                     }
@@ -150,7 +178,6 @@ public class HiloServer extends Thread{
             }
         }
             String[] mensajePorPartes = mensaje.split("-");
-            int numeroCliente = detectarCliente(ipPaquete, puertoPaquete);
             if(numeroCliente == -1){
                 System.err.println("Error, cliente no detectado al revisar en el paquete.");
             } else{
@@ -199,13 +226,20 @@ public class HiloServer extends Thread{
                             " desconectado. Jugadores conectados: " +
                             cantClientes
                     );
+
+                    enviarMensajeAtodos("JugadorDesconectado");
+
+                    fin = true;
+
                 }
 
             }
 
             if (mensaje.equals("Hola")) {
                 enviarMensaje("Hola", ipPaquete, puertoPaquete);
+                clienteConfirmado = true;
             }
+
 
     }
 
@@ -252,7 +286,49 @@ public class HiloServer extends Thread{
         }
     }
 
-//    public void restarCantidadClientes(){
+    public boolean isFin() {
+        return fin;
+    }
+
+    private void revisarTimeouts() {
+        long ahora = System.currentTimeMillis();
+
+        for (int i = 0; i < clientes.length; i++) {
+            if (clientes[i] != null
+                && !terminado[i]
+                && ahora - ultimoContacto[i] > TIMEOUT_CLIENTE) {
+
+                System.out.println("Jugador " + (i + 1) + " dejó de responder (cierre brusco o caída de red).");
+                desconectarCliente(i);
+            }
+        }
+    }
+
+    private void desconectarCliente(int i) {
+        if (clientes[i] == null) return;
+
+        boolean avisarRival = !terminado[i];
+
+        clientes[i] = null;
+        cantClientes--;
+
+        System.out.println("Jugadores conectados: " + cantClientes);
+
+        if (avisarRival) {
+            enviarMensajeAtodos("JugadorDesconectado");
+            clienteDesconectado = true;
+        }
+    }
+
+    public boolean isClienteDesconectado() {
+        return clienteDesconectado;
+    }
+
+    public void setJugadorTerminado(int indice) {
+        terminado[indice] = true;
+    }
+
+    //    public void restarCantidadClientes(){
 //        this.cantClientes--;
 //    }
 
