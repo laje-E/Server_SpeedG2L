@@ -1,7 +1,5 @@
 package com.g2l.speedg2l.pantallas;
 
-
-
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
@@ -164,11 +162,15 @@ public class PantallaJuego extends Pantalla {
 
             if (!pausado) {
                   jugador.actualizarFisicas(listaDeEntidades, delta);
-                  jugador.animar(delta);
+//<<<<<<< HEAD
+//                  jugador.animar(delta);
+//                  jugador2.actualizarFisicas(listaDeEntidades, delta);
+//                  jugador2.animar(delta);
+//
+////               hiloServidor.almacenarDelta(delta);
+//=======
                   jugador2.actualizarFisicas(listaDeEntidades, delta);
-                  jugador2.animar(delta);
-
-//               hiloServidor.almacenarDelta(delta);
+                  hiloServidor.realizarBroadcastJuego();
 
                 hud.actualizar();
                 if (!jugadorTermino[0] && jugador.colisionaCon(meta)) {
@@ -264,8 +266,6 @@ public class PantallaJuego extends Pantalla {
         }
     }
 
-
-
     private void registrarLlegada(int idJugador) {
         int indice = idJugador - 1;
 
@@ -278,7 +278,7 @@ public class PantallaJuego extends Pantalla {
                 idJugador
             );
 
-            hiloServidor.enviarMensajeATodos(
+            hiloServidor.enviarMensajeAtodos(
                 "LLEGO-" + idJugador
                     + "-" + contadorPosicion
                     + "-" + hud.getTiempo()
@@ -288,7 +288,7 @@ public class PantallaJuego extends Pantalla {
 
             // Cuando terminan ambos, ya tenemos la clasificación completa.
             if (contadorPosicion > 2) {
-                hiloServidor.enviarMensajeATodos("TODOS_TERMINARON");
+                hiloServidor.enviarMensajeAtodos("TODOS_TERMINARON");
 //                cambiarPantalla(
 //                    new PantallaFin(juego, posiciones)
 //                );

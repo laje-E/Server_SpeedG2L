@@ -48,10 +48,11 @@ public class HiloServer extends Thread{
         }
     }
 
-    public void enviarMensajeATodos(String mensaje){
-        for(int i=0; i<cantClientes; i++){
-            if(clientes[i] != null) {
-                byte[] data = mensaje.getBytes();
+    public void enviarMensajeAtodos(String mensaje){
+        byte[] data = mensaje.getBytes();
+
+        for(int i=0; i<clientes.length; i++){
+           if(clientes[i] != null) {
                 DireccionRed direccionCliente = clientes[i].getDireccionRed();
                 DatagramPacket dp = new DatagramPacket(data, data.length, direccionCliente.getIp(), direccionCliente.getPuerto());
                 try {
@@ -63,15 +64,28 @@ public class HiloServer extends Thread{
         }
     }
 
+
+    public void realizarBroadcastJuego() {
+        for(int i = 0; i < clientes.length; i++) {
+            if(clientes[i] != null) {
+                Jugador jugadorCliente = clientes[i].getJugador();
+                enviarMensajeAtodos("Movimiento-" +
+                        jugadorCliente.getPosicionX() + "-" +
+                        jugadorCliente.getPosicionY() + "-" +
+                        Jugadores.values()[i]
+                );
+            }
+        }
+    }
+
     @Override
     public void run() {
         System.out.println("Servidor iniciado. Esperando conexiones...");
 
-
         while(!fin){
             if(puertoServer == null){
                 System.err.println("El socket del servidor no está disponible.");
-                return;
+                fin=true;
             }
             byte[] data = new byte[1024];
             DatagramPacket dp = new DatagramPacket(data, data.length);
@@ -93,7 +107,7 @@ public class HiloServer extends Thread{
             procesarMensaje(dp);
         }
 
-        System.out.println("HiloServer finalizado.");
+        System.out.println("\n\nHiloServer finalizado.");
     }
 
       private void procesarMensaje(DatagramPacket dp){
@@ -144,34 +158,34 @@ public class HiloServer extends Thread{
                 if (mensajePorPartes[0].equals("Aprete")) {
                     if (mensajePorPartes[1].equals("Izquierda")) {
                         jugadorCliente.moverIzquierda(true);
-                        enviarMensajeATodos("Movimiento-" + jugadorCliente.getPosicionX() + "-" +
-                            jugadorCliente.getPosicionY() + "-" + Jugadores.values()[numeroCliente]);
+//                        enviarMensajeAtodos("Movimiento-" + jugadorCliente.getPosicionX() + "-" +
+//                            jugadorCliente.getPosicionY() + "-" + Jugadores.values()[numeroCliente]);
 
                     } else if (mensajePorPartes[1].equals("Derecha")) {
 
                         jugadorCliente.moverDerecha(true);
-                        enviarMensajeATodos("Movimiento-" + jugadorCliente.getPosicionX() + "-" +
-                            jugadorCliente.getPosicionY() + "-" + Jugadores.values()[numeroCliente]);
+//                        enviarMensajeAtodos("Movimiento-" + jugadorCliente.getPosicionX() + "-" +
+//                            jugadorCliente.getPosicionY() + "-" + Jugadores.values()[numeroCliente]);
 
                     } else if (mensajePorPartes[1].equals("Arriba")) {
 
                         jugadorCliente.saltar();
-                        enviarMensajeATodos("Movimiento-" + jugadorCliente.getPosicionX() + "-" +
-                            jugadorCliente.getPosicionY() + "-" + Jugadores.values()[numeroCliente]);
+//                        enviarMensajeAtodos("Movimiento-" + jugadorCliente.getPosicionX() + "-" +
+//                            jugadorCliente.getPosicionY() + "-" + Jugadores.values()[numeroCliente]);
 
                     }
                 } else if (mensajePorPartes[0].equals("NoAprete")) {
                     if (mensajePorPartes[1].equals("Izquierda")) {
 
                         jugadorCliente.moverIzquierda(false);
-                        enviarMensajeATodos("Movimiento-" + jugadorCliente.getPosicionX() + "-" +
-                            jugadorCliente.getPosicionY() + "-" + Jugadores.values()[numeroCliente]);
+//                        enviarMensajeAtodos("Movimiento-" + jugadorCliente.getPosicionX() + "-" +
+//                            jugadorCliente.getPosicionY() + "-" + Jugadores.values()[numeroCliente]);
 
                     } else if (mensajePorPartes[1].equals("Derecha")) {
 
                         jugadorCliente.moverDerecha(false);
-                        enviarMensajeATodos("Movimiento-" + jugadorCliente.getPosicionX() + "-" +
-                            jugadorCliente.getPosicionY() + "-" + Jugadores.values()[numeroCliente]);
+//                        enviarMensajeAtodos("Movimiento-" + jugadorCliente.getPosicionX() + "-" +
+//                            jugadorCliente.getPosicionY() + "-" + Jugadores.values()[numeroCliente]);
 
                     }
                 }
@@ -188,7 +202,6 @@ public class HiloServer extends Thread{
                 }
 
             }
-
 
             if (mensaje.equals("Hola")) {
                 enviarMensaje("Hola", ipPaquete, puertoPaquete);
@@ -239,12 +252,12 @@ public class HiloServer extends Thread{
         }
     }
 
-    public void restarCantidadClietnes(){
-        this.cantClientes--;
-    }
+//    public void restarCantidadClientes(){
+//        this.cantClientes--;
+//    }
 
-    public void borrarJugador(int numeroJugador){
-        this.clientes[numeroJugador] = null;
-    }
+//    public void borrarJugador(int numeroJugador){
+//        this.clientes[numeroJugador] = null;
+//    }
 
 }
