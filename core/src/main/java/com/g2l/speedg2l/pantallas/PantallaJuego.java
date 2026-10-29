@@ -10,7 +10,6 @@ import com.badlogic.gdx.maps.MapProperties;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.viewport.FitViewport;
-import com.g2l.speedg2l.componentes.Imagen;
 import com.g2l.speedg2l.componentes.Texto;
 import com.g2l.speedg2l.componentes.interfaz.Hud;
 import com.g2l.speedg2l.entidades.*;
@@ -36,12 +35,7 @@ public class PantallaJuego extends Pantalla {
     private Musica musicaJuego;
     private Hud hud;
 
-    private Pincho pincho;
-    private Imagen imgPincho;
-
     private ArrayList<Entidad> listaDeEntidades;
-
-    private ArrayList<Obstaculo> listaDeObstaculos;
 
     private Mapa mapa;
     private Camara camara;
@@ -83,8 +77,8 @@ public class PantallaJuego extends Pantalla {
         mapa = new Mapa(Recursos.NIVEL_1);
         entradas = new Entradas();
 
-        jugador = new Jugador(70.0f, 70.0f, 0.0f, 33.0f, Recursos.JUGADOR_1);
-        jugador2 = new Jugador(70.0f, 70.0f, 25.0f, 33.0f, Recursos.JUGADOR_2);
+        jugador = Jugadores.JUGADOR_1.crearJugador();
+        jugador2 = Jugadores.JUGADOR_2.crearJugador();
         hud = new Hud();
 
         meta = new Meta(50.0f, 1000.0f, 8000.0f, 100.0f);
@@ -95,8 +89,6 @@ public class PantallaJuego extends Pantalla {
 
         textoEspera.setTexto("Esperando jugador");
         textoEspera.centrar();
-
-        listaDeObstaculos = new ArrayList<>();
 
         cargarColisionesDesdeMapa();
 
@@ -164,13 +156,7 @@ public class PantallaJuego extends Pantalla {
 
             if (!pausado) {
                   jugador.actualizarFisicas(listaDeEntidades, delta);
-//<<<<<<< HEAD
-//                  jugador.animar(delta);
-//                  jugador2.actualizarFisicas(listaDeEntidades, delta);
-//                  jugador2.animar(delta);
-//
-////               hiloServidor.almacenarDelta(delta);
-//=======
+
                   jugador2.actualizarFisicas(listaDeEntidades, delta);
                   hiloServidor.realizarBroadcastJuego();
 
