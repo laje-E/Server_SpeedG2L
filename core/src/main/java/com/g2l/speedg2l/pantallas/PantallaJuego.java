@@ -17,6 +17,7 @@ import com.g2l.speedg2l.mundo.Camara;
 import com.g2l.speedg2l.mundo.Mapa;
 import com.g2l.speedg2l.servidor.HiloServer;
 import com.g2l.speedg2l.servidor.PosicionFinal;
+import com.g2l.speedg2l.servidor.ProtocolosRed;
 import com.g2l.speedg2l.sonidos.Musica;
 import com.g2l.speedg2l.utilidades.Config;
 import com.g2l.speedg2l.utilidades.Entradas;
@@ -266,26 +267,22 @@ public class PantallaJuego extends Pantalla {
             jugadorTermino[indice] = true;
             hiloServidor.setJugadorTerminado(indice);
 
-            posiciones[contadorPosicion - 1] = new PosicionFinal(
-                hud.getTiempo(),
-                contadorPosicion,
-                idJugador
-            );
+            posiciones[contadorPosicion - 1] = new PosicionFinal(hud.getTiempo(), contadorPosicion, idJugador);
 
             hiloServidor.enviarMensajeAtodos(
-                "LLEGO-" + idJugador
-                    + "-" + contadorPosicion
-                    + "-" + hud.getTiempo()
+                ProtocolosRed.LLEGO +
+                ProtocolosRed.SEPARADOR +
+                idJugador +
+                ProtocolosRed.SEPARADOR +
+                contadorPosicion +
+                ProtocolosRed.SEPARADOR +
+                hud.getTiempo()
             );
 
             contadorPosicion++;
 
-            // Cuando terminan ambos, ya tenemos la clasificación completa.
             if (contadorPosicion > 2) {
-                hiloServidor.enviarMensajeAtodos("TODOS_TERMINARON");
-//                cambiarPantalla(
-//                    new PantallaFin(juego, posiciones)
-//                );
+                hiloServidor.enviarMensajeAtodos(ProtocolosRed.TODOS_TERMINARON);
             }
         }
     }

@@ -22,9 +22,6 @@ public class HiloServer extends Thread{
     private Cliente[] clientes;
     private int cantClientes=0;
     private Jugador jugador1, jugador2;
-//  private ArrayList<Entidad> listaEntidades;
-
-//    private float delta;
 
     private boolean clienteConfirmado = false;
 
@@ -34,32 +31,24 @@ public class HiloServer extends Thread{
     private long[] ultimoContacto = new long[2];
     private boolean[] terminado   = new boolean[2];   // jugadores que ya llegaron a la meta
 
-    private volatile boolean partidaEnCurso = false;
-    private volatile boolean partidaCancelada = false;
 
     private boolean clienteDesconectado = false;
 
     public HiloServer(){
         clientes = new Cliente[2];
-//      listaEntidades = new ArrayList<>();
         try {
             direccionServer = InetAddress.getByName("255.255.255.255");
             puertoServer = new DatagramSocket(6412);
-//            puertoServer.setSoTimeout(TIEMPO_ESPERA_RECEIVE);
         }catch (SocketException | UnknownHostException evento){
             evento.printStackTrace();
         }
     }
 
-    public boolean isClienteConfirmado() {
-        return clienteConfirmado;
-    }
 
     public void enviarMensaje(String mensaje, InetAddress ipDestino, int puerto){
         byte[] data = mensaje.getBytes();
         DatagramPacket dp = new DatagramPacket(data, data.length, ipDestino, puerto);
         try {
-//            System.out.println("Mensaje: " + (new String (dp.getData())).tr   im());
             puertoServer.send(dp);
         }catch (IOException event){
             event.printStackTrace();
@@ -84,13 +73,17 @@ public class HiloServer extends Thread{
 
 
     public void realizarBroadcastJuego() {
-        for(int i = 0; i < clientes.length; i++) {
-            if(clientes[i] != null) {
+        for (int i = 0; i < clientes.length; i++) {
+            if (clientes[i] != null) {
                 Jugador jugadorCliente = clientes[i].getJugador();
-                enviarMensajeAtodos("Movimiento-" +
-                        jugadorCliente.getPosicionX() + "-" +
-                        jugadorCliente.getPosicionY() + "-" +
-                        Jugadores.values()[i]
+                enviarMensajeAtodos(
+                    ProtocolosRed.MOVIMIENTO +
+                    ProtocolosRed.SEPARADOR +
+                    jugadorCliente.getPosicionX() +
+                    ProtocolosRed.SEPARADOR +
+                    jugadorCliente.getPosicionY() +
+                    ProtocolosRed.SEPARADOR +
+                    (i + 1)
                 );
             }
         }
@@ -141,106 +134,126 @@ public class HiloServer extends Thread{
     private void evaluarMensaje(String mensaje, InetAddress ipPaquete, int puertoPaquete){
 
         int numeroCliente = detectarCliente(ipPaquete, puertoPaquete);
+
         if (numeroCliente != -1) {
             ultimoContacto[numeroCliente] = System.currentTimeMillis();
         }
 
-        if(mensaje.equals("Conexion")){
-            if(cantClientes < 2) {
-                int espacio = buscarEspacioLibre();
-
-                if(espacio != -1) {
-                    DireccionRed direccionRedParaCliente = new DireccionRed(ipPaquete, puertoPaquete);
-                    if (espacio == 0) {
-                        clientes[0] = new Cliente(direccionRedParaCliente, jugador1);
-                        ultimoContacto[0] = System.currentTimeMillis();
-                        System.out.println("Datos cliente nro°" + cantClientes + ": " + direccionRedParaCliente.getIp() + direccionRedParaCliente.getPuerto());
-                        enviarMensaje("OK", direccionRedParaCliente.getIp(), direccionRedParaCliente.getPuerto());
-                        cantClientes++;
-                    } else if (espacio == 1) {
-                        clientes[1] = new Cliente(direccionRedParaCliente, jugador2);
-                        ultimoContacto[1] = System.currentTimeMillis();
-                        enviarMensaje("OK", direccionRedParaCliente.getIp(), direccionRedParaCliente.getPuerto());
-                        cantClientes++;
-                    }
-                    if (cantClientes == 2) {
-                        for (int i = 0; i < cantClientes; i++) {
-                            DireccionRed direccionRedCliente = clientes[i].getDireccionRed();
-                            enviarMensaje("Empezar", direccionRedCliente.getIp(), direccionRedCliente.getPuerto());
-                            enviarMensaje("NumeroJugador-" + Jugadores.values()[i].toString(), direccionRedCliente.getIp(), direccionRedCliente.getPuerto());
-                            PantallaJuego.empezarJuego();
-                        }
-                    }
-                }
+        if (mensaje.equals(ProtocolosRed.ESTAS_AHI)) {
+            if (numeroCliente != -1) {
+                enviarMensaje(ProtocolosRed.ESTOY_ACA, ipPaquete, puertoPaquete);
             }
-            else{
-                enviarMensaje("ERROR-limiteDeClientesAlcanzado", ipPaquete, puertoPaquete);
-            }
+            return;
         }
-            String[] mensajePorPartes = mensaje.split("-");
-            if(numeroCliente == -1){
-                System.err.println("Error, cliente no detectado al revisar en el paquete.");
-            } else{
-                Jugador jugadorCliente = clientes[numeroCliente].getJugador();
-                if (mensajePorPartes[0].equals("Aprete")) {
-                    if (mensajePorPartes[1].equals("Izquierda")) {
-                        jugadorCliente.moverIzquierda(true);
-//                        enviarMensajeAtodos("Movimiento-" + jugadorCliente.getPosicionX() + "-" +
-//                            jugadorCliente.getPosicionY() + "-" + Jugadores.values()[numeroCliente]);
 
-                    } else if (mensajePorPartes[1].equals("Derecha")) {
+        if (mensaje.equals(ProtocolosRed.CONEXION)) {
+            if (numeroCliente != -1) {
+                DireccionRed direccionCliente = clientes[numeroCliente].getDireccionRed();
 
-                        jugadorCliente.moverDerecha(true);
-//                        enviarMensajeAtodos("Movimiento-" + jugadorCliente.getPosicionX() + "-" +
-//                            jugadorCliente.getPosicionY() + "-" + Jugadores.values()[numeroCliente]);
+                enviarMensaje(ProtocolosRed.OK, direccionCliente.getIp(), direccionCliente.getPuerto());
 
-                    } else if (mensajePorPartes[1].equals("Arriba")) {
-
-                        jugadorCliente.saltar();
-//                        enviarMensajeAtodos("Movimiento-" + jugadorCliente.getPosicionX() + "-" +
-//                            jugadorCliente.getPosicionY() + "-" + Jugadores.values()[numeroCliente]);
-
-                    }
-                } else if (mensajePorPartes[0].equals("NoAprete")) {
-                    if (mensajePorPartes[1].equals("Izquierda")) {
-
-                        jugadorCliente.moverIzquierda(false);
-//                        enviarMensajeAtodos("Movimiento-" + jugadorCliente.getPosicionX() + "-" +
-//                            jugadorCliente.getPosicionY() + "-" + Jugadores.values()[numeroCliente]);
-
-                    } else if (mensajePorPartes[1].equals("Derecha")) {
-
-                        jugadorCliente.moverDerecha(false);
-//                        enviarMensajeAtodos("Movimiento-" + jugadorCliente.getPosicionX() + "-" +
-//                            jugadorCliente.getPosicionY() + "-" + Jugadores.values()[numeroCliente]);
-
-                    }
-                }
-                else if (mensajePorPartes[0].equals("SeSalioDelJuego")){
-                    clientes[numeroCliente] = null;
-                    int numeroJugador = Integer.parseInt(mensajePorPartes[1]);
-                    cantClientes--;
-
-                    System.out.println(
-                        "Jugador " + (numeroCliente + 1) +
-                            " desconectado. Jugadores conectados: " +
-                            cantClientes
+                if(cantClientes == 2) {
+                    enviarMensaje(ProtocolosRed.EMPEZAR, direccionCliente.getIp(),direccionCliente.getPuerto());
+                    enviarMensaje(
+                        ProtocolosRed.NUMERO_JUGADOR +
+                        ProtocolosRed.SEPARADOR +
+                        (numeroCliente + 1),
+                        direccionCliente.getIp(),
+                        direccionCliente.getPuerto()
                     );
-
-                    enviarMensajeAtodos("JugadorDesconectado");
-
-                    fin = true;
-
                 }
-
+                return;
             }
 
-            if (mensaje.equals("Hola")) {
-                enviarMensaje("Hola", ipPaquete, puertoPaquete);
-                clienteConfirmado = true;
+            if(cantClientes >= 2) {
+                enviarMensaje(ProtocolosRed.ERROR_LIMITE_CLIENTES, ipPaquete, puertoPaquete);
+                return;
             }
 
+            int espacio = buscarEspacioLibre();
 
+            if(espacio != -1) {
+                DireccionRed direccionRed = new DireccionRed(ipPaquete, puertoPaquete);
+
+                Jugador jugadorAsignado = (espacio == 0) ? jugador1 : jugador2;
+
+                clientes[espacio] = new Cliente(direccionRed, jugadorAsignado);
+                ultimoContacto[espacio] = System.currentTimeMillis();
+
+                cantClientes++;
+
+                enviarMensaje(ProtocolosRed.OK, ipPaquete, puertoPaquete);
+
+                System.out.println("Cliente conectado: jugador " + (espacio + 1));
+
+                if (cantClientes == 2) {
+
+                    for (int i=0; i < cantClientes; i++) {
+                        DireccionRed direccionRedCliente = clientes[i].getDireccionRed();
+
+                        enviarMensaje(
+                            ProtocolosRed.EMPEZAR,
+                            direccionRedCliente.getIp(),
+                            direccionRedCliente.getPuerto()
+                        );
+
+                        enviarMensaje(
+                            ProtocolosRed.NUMERO_JUGADOR +
+                            ProtocolosRed.SEPARADOR +
+                            (i + 1),
+                            direccionRedCliente.getIp(),
+                            direccionRedCliente.getPuerto()
+                        );
+                    }
+
+                    PantallaJuego.empezarJuego();
+                }
+            }
+
+            return;
+        }
+
+        String[] mensajePorPartes = mensaje.split(ProtocolosRed.SEPARADOR);
+
+        if(numeroCliente == -1){
+                System.err.println("Error, cliente no detectado al revisar en el paquete.");
+            }else{
+                final int ACCION=0;
+                final int SENTIDO=1;
+                Jugador jugadorCliente = clientes[numeroCliente].getJugador();
+
+                if(mensajePorPartes[ACCION].equals(ProtocolosRed.APRETE)) {
+
+                    if(mensajePorPartes[SENTIDO].equals(ProtocolosRed.IZQUIERDA)) {
+                        jugadorCliente.moverIzquierda(true);
+                    }
+                        else if (mensajePorPartes[SENTIDO].equals(ProtocolosRed.DERECHA)) {
+                            jugadorCliente.moverDerecha(true);
+                        }
+                            else if (mensajePorPartes[SENTIDO].equals(ProtocolosRed.ARRIBA)) {
+                                jugadorCliente.saltar();
+                            }
+
+                } else if (mensajePorPartes[ACCION].equals(ProtocolosRed.NO_APRETE)) {
+                    if (mensajePorPartes[SENTIDO].equals(ProtocolosRed.IZQUIERDA)) {
+                        jugadorCliente.moverIzquierda(false);
+                    }
+                        else if (mensajePorPartes[SENTIDO].equals(ProtocolosRed.DERECHA)) {
+                            jugadorCliente.moverDerecha(false);
+                        }
+                }
+                    else if(mensajePorPartes[ACCION].equals(ProtocolosRed.SE_SALIO_DEL_JUEGO)){
+                        clientes[numeroCliente] = null;
+                        cantClientes--;
+
+                        System.out.println("Jugador " + (numeroCliente + 1) + " desconectado. Jugadores conectados: " + cantClientes);
+
+                        enviarMensajeAtodos(ProtocolosRed.JUGADOR_DESCONECTADO);
+
+                        fin=true;
+                    }
+
+            }
     }
 
     private int buscarEspacioLibre() {
@@ -314,8 +327,8 @@ public class HiloServer extends Thread{
 
         System.out.println("Jugadores conectados: " + cantClientes);
 
-        if (avisarRival) {
-            enviarMensajeAtodos("JugadorDesconectado");
+        if(avisarRival){
+            enviarMensajeAtodos(ProtocolosRed.JUGADOR_DESCONECTADO);
             clienteDesconectado = true;
         }
     }
@@ -324,16 +337,12 @@ public class HiloServer extends Thread{
         return clienteDesconectado;
     }
 
+    public boolean isClienteConfirmado() {
+        return clienteConfirmado;
+    }
+
     public void setJugadorTerminado(int indice) {
         terminado[indice] = true;
     }
-
-    //    public void restarCantidadClientes(){
-//        this.cantClientes--;
-//    }
-
-//    public void borrarJugador(int numeroJugador){
-//        this.clientes[numeroJugador] = null;
-//    }
 
 }
