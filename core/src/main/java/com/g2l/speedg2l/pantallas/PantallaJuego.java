@@ -42,10 +42,6 @@ public class PantallaJuego extends Pantalla {
     private Camara camara;
     private Entradas entradas;
 
-    private boolean pausado = false;
-    private ShapeRenderer pantallaPausa = new ShapeRenderer();
-    private Texto textoPausa = new Texto(Recursos.FUENTE_MENU, 60, Color.RED);
-
     private Texto textoEspera = new Texto(Recursos.FUENTE_MENU, 60, Color.WHITE);
 
     private Meta meta;
@@ -86,7 +82,6 @@ public class PantallaJuego extends Pantalla {
 
         listaDeEntidades = new ArrayList<>();
 
-        textoPausa.setTexto("PAUSADO");
 
         textoEspera.setTexto("Esperando jugador");
         textoEspera.centrar();
@@ -131,6 +126,9 @@ public class PantallaJuego extends Pantalla {
 
     @Override
     public void render(float delta) {
+
+        hiloServidor.actualizarCuentaRegresiva();
+
         if(hiloServidor.getCantClientes() < 2){
             b.begin();
 
@@ -151,11 +149,6 @@ public class PantallaJuego extends Pantalla {
             b.setProjectionMatrix(camara.getCamara().combined);
             b.begin();
 
-            if (entradas.escape()) {
-                pausado = !pausado;
-            }
-
-            if (!pausado) {
                   jugador.actualizarFisicas(listaDeEntidades, delta);
 
                   jugador2.actualizarFisicas(listaDeEntidades, delta);
@@ -173,14 +166,7 @@ public class PantallaJuego extends Pantalla {
                     hiloServidor.finalizarHilo();
                     terminarJuego = true;
                 }
-            } else if (pausado) {
-                textoPausa.setPosition(
-                    (Config.getAnchoJuego() / 2) - (textoPausa.getAncho() / 2),
-                    (Config.getAltoJuego() / 2) + (textoPausa.getAlto() / 2)
-                );
 
-     //           musicaJuego.pausar();
-            }
 
             jugador.dibujar();
             jugador2.dibujar();
@@ -189,9 +175,6 @@ public class PantallaJuego extends Pantalla {
 
             b.setProjectionMatrix(stage.getCamera().combined);
 
-            if (pausado) {
-                dibujarPausa();
-            }
 
             b.begin();
 
@@ -209,27 +192,6 @@ public class PantallaJuego extends Pantalla {
         }
     }
 
-    private void dibujarPausa() {
-
-        Gdx.gl.glEnable(GL20.GL_BLEND);
-
-        pantallaPausa.setProjectionMatrix(stage.getCamera().combined);
-
-        pantallaPausa.begin(ShapeRenderer.ShapeType.Filled);
-
-        pantallaPausa.setColor(0, 0, 0, 0.7f);
-
-        pantallaPausa.rect(
-            0,
-            0,
-            Config.getAnchoJuego(),
-            Config.getAltoJuego()
-        );
-
-        pantallaPausa.end();
-
-        Gdx.gl.glDisable(GL20.GL_BLEND);
-    }
 
     private void cargarColisionesDesdeMapa() {
         if (mapa != null && mapa.getMapa() != null) {

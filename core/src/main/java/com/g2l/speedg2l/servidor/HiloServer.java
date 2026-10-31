@@ -34,6 +34,13 @@ public class HiloServer extends Thread{
 
     private boolean clienteDesconectado = false;
 
+    private final int SEGUNDOS_CUENTA = 3;
+    private int cuentaRegresiva = 0;
+    private boolean cuentaEnCurso = false;
+    private boolean partidaIniciada = false;
+    private long inicioCuenta = 0;
+    private int ultimoNumeroEnviado = -1;
+
     public HiloServer(){
         clientes = new Cliente[2];
         try {
@@ -153,7 +160,6 @@ public class HiloServer extends Thread{
                 enviarMensaje(ProtocolosRed.OK, direccionCliente.getIp(), direccionCliente.getPuerto());
 
                 if(cantClientes == 2) {
-                    enviarMensaje(ProtocolosRed.EMPEZAR, direccionCliente.getIp(),direccionCliente.getPuerto());
                     enviarMensaje(
                         ProtocolosRed.NUMERO_JUGADOR +
                         ProtocolosRed.SEPARADOR +
@@ -161,6 +167,11 @@ public class HiloServer extends Thread{
                         direccionCliente.getIp(),
                         direccionCliente.getPuerto()
                     );
+
+                    if (partidaIniciada) {
+                        enviarMensajeAtodos(ProtocolosRed.EMPEZAR);
+                    }
+
                 }
                 return;
             }
@@ -192,21 +203,16 @@ public class HiloServer extends Thread{
                         DireccionRed direccionRedCliente = clientes[i].getDireccionRed();
 
                         enviarMensaje(
-                            ProtocolosRed.EMPEZAR,
-                            direccionRedCliente.getIp(),
-                            direccionRedCliente.getPuerto()
-                        );
-
-                        enviarMensaje(
                             ProtocolosRed.NUMERO_JUGADOR +
                             ProtocolosRed.SEPARADOR +
                             (i + 1),
                             direccionRedCliente.getIp(),
                             direccionRedCliente.getPuerto()
                         );
-                    }
 
-                    PantallaJuego.empezarJuego();
+                        iniciarCuentaRegresiva();
+
+                    }
                 }
             }
 
@@ -331,6 +337,48 @@ public class HiloServer extends Thread{
             enviarMensajeAtodos(ProtocolosRed.JUGADOR_DESCONECTADO);
             clienteDesconectado = true;
         }
+    }
+
+    private void iniciarCuentaRegresiva() {
+        if (!cuentaEnCurso && !partidaIniciada) {
+            ultimoNumeroEnviado = -1;
+            inicioCuenta = System.currentTimeMillis();
+            cuentaEnCurso = true;
+        }
+    }
+
+    public void actualizarCuentaRegresiva() {
+        if (cuentaEnCurso) {
+            long transcurrido = System.currentTimeMillis() - inicioCuenta;
+            int restante = SEGUNDOS_CUENTA - (int) (transcurrido / 1000);
+
+            if (restante <= 0) {
+                cuentaRegresiva = 0;
+                cuentaEnCurso = false;
+                partidaIniciada = true;
+
+                enviarMensajeAtodos(ProtocolosRed.EMPEZAR);
+                PantallaJuego.empezarJuego();
+                return;
+            }
+
+            // Solo mandamos el mensaje cuando cambia el número (una vez por segundo)
+            if (restante != ultimoNumeroEnviado) {
+                ultimoNumeroEnviado = restante;
+                cuentaRegresiva = restante;
+                enviarMensajeAtodos(ProtocolosRed.CUENTA_REGRESIVA + ProtocolosRed.SEPARADOR + restante);
+            }
+        }
+    }
+
+    private void cancelarCuenta() {
+        cuentaRegresiva = 0;
+        cuentaEnCurso = false;
+        enviarMensajeAtodos(ProtocolosRed.CUENTA_REGRESIVA + ProtocolosRed.SEPARADOR + 0);
+    }
+
+    public int getCuentaRegresiva() {
+        return cuentaRegresiva;
     }
 
     public boolean isClienteDesconectado() {
