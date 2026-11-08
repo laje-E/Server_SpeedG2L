@@ -28,10 +28,10 @@ public abstract class Pantalla implements Screen {
 
     protected void cambiarPantalla(Screen pantallaNueva) {
         Screen pantallaAnterior = juego.getScreen();
-        juego.setScreen(pantallaNueva);
         if (pantallaAnterior != null) {
             pantallaAnterior.dispose();
         }
+        juego.setScreen(pantallaNueva);
     }
 
     protected void configurarInput(InputProcessor inputProcessor) {
