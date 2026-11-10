@@ -49,7 +49,7 @@ public class PantallaMenu extends Pantalla{
 
     @Override
     public void render(float delta) {
-        Render.limpiarPantalla();
+        limpiarPantalla();
 
         configViewport.aplicarViewport(batch);
         batch.begin();

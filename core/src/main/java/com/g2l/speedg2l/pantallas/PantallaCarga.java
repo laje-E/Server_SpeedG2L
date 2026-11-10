@@ -29,7 +29,7 @@ public class PantallaCarga extends Pantalla {
 
     @Override
     public void render(float delta) {
-        Render.limpiarPantalla();
+        limpiarPantalla();
 
         fade.iniciar();
 

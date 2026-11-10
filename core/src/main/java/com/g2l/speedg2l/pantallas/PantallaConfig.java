@@ -373,7 +373,7 @@ public class PantallaConfig extends Pantalla {
 
     @Override
     public void render(float delta) {
-        Render.limpiarPantalla();
+        limpiarPantalla();
 
         stage.act(delta);
         stage.draw();

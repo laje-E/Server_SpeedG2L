@@ -7,7 +7,4 @@ public class Render {
 
     private Render(){}
 
-    public static void limpiarPantalla(){
-        ScreenUtils.clear(Color.BLACK);
-    }
 }

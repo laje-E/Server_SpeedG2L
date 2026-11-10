@@ -108,6 +108,7 @@ public class PantallaJuego extends Pantalla {
 
     @Override
     public void render(float delta) {
+        limpiarPantalla();
 
         hiloServidor.actualizarCuentaRegresiva();
 
@@ -122,7 +123,7 @@ public class PantallaJuego extends Pantalla {
         if(empieza) {
             delta = Gdx.graphics.getDeltaTime();
 
-            Render.limpiarPantalla();
+            limpiarPantalla();
 
             camara.seguirJugador(jugador);
 
