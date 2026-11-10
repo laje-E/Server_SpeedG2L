@@ -7,8 +7,6 @@ public class Render {
 
     private Render(){}
 
-    public static SpriteBatch batch = new SpriteBatch();
-
     public static void limpiarPantalla(){
         ScreenUtils.clear(Color.BLACK);
     }

@@ -34,7 +34,7 @@ public class HiloServer extends Thread{
 
     private boolean clienteDesconectado = false;
 
-    private final int SEGUNDOS_CUENTA = 3;
+    private final int SEGUNDOS_CUENTA = 5;
     private int cuentaRegresiva = 0;
     private boolean cuentaEnCurso = false;
     private boolean partidaIniciada = false;

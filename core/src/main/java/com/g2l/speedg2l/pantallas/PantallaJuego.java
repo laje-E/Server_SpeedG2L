@@ -3,9 +3,7 @@ package com.g2l.speedg2l.pantallas;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.maps.MapProperties;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.scenes.scene2d.Stage;
@@ -20,7 +18,6 @@ import com.g2l.speedg2l.servidor.PosicionFinal;
 import com.g2l.speedg2l.servidor.ProtocolosRed;
 import com.g2l.speedg2l.sonidos.Musica;
 import com.g2l.speedg2l.utilidades.Config;
-import com.g2l.speedg2l.utilidades.Entradas;
 import com.g2l.speedg2l.utilidades.Recursos;
 import com.g2l.speedg2l.utilidades.Render;
 
@@ -32,7 +29,6 @@ public class PantallaJuego extends Pantalla {
 
     private Jugador jugador;
     private Jugador jugador2;
-    private SpriteBatch b;
     private Musica musicaJuego;
     private Hud hud;
 
@@ -40,9 +36,7 @@ public class PantallaJuego extends Pantalla {
 
     private Mapa mapa;
     private Camara camara;
-    private Entradas entradas;
-
-    private Texto textoEspera = new Texto(Recursos.FUENTE_MENU, 60, Color.WHITE);
+    private Texto textoEspera = new Texto(Recursos.FUENTE_MENU, 60, Color.WHITE, batch);
 
     private Meta meta;
 
@@ -50,20 +44,18 @@ public class PantallaJuego extends Pantalla {
 
     private HiloServer hiloServidor;
 
-    private PosicionFinal[] posiciones = new PosicionFinal[2];
+    private PosicionFinal[] posiciones;
     private boolean[] jugadorTermino = new boolean[2];
     private int contadorPosicion = 1;
 
     private boolean terminarJuego = false;
 
-    protected PantallaJuego(Game juego) {
-        super(juego);
+    protected PantallaJuego(Game juego, SpriteBatch b) {
+        super(juego, b);
     }
 
     @Override
     public void show() {
-        b = Render.batch;
-
         empieza = false;
         contadorPosicion = 1;
         jugadorTermino = new boolean[2];
@@ -72,16 +64,13 @@ public class PantallaJuego extends Pantalla {
 
         camara = new Camara(configViewport);
         mapa = new Mapa(Recursos.NIVEL_1);
-        entradas = new Entradas();
-
-        jugador = Jugadores.JUGADOR_1.crearJugador();
-        jugador2 = Jugadores.JUGADOR_2.crearJugador();
-        hud = new Hud();
+        jugador = Jugadores.JUGADOR_1.crearJugador(batch);
+        jugador2 = Jugadores.JUGADOR_2.crearJugador(batch);
+        hud = new Hud(batch);
 
         meta = new Meta(50.0f, 1000.0f, 8000.0f, 100.0f);
 
         listaDeEntidades = new ArrayList<>();
-
 
         textoEspera.setTexto("Esperando jugador");
         textoEspera.centrar();
@@ -123,11 +112,11 @@ public class PantallaJuego extends Pantalla {
         hiloServidor.actualizarCuentaRegresiva();
 
         if(hiloServidor.getCantClientes() < 2){
-            b.begin();
+            batch.begin();
 
             textoEspera.dibujar();
 
-            b.end();
+            batch.end();
         }
 
         if(empieza) {
@@ -139,8 +128,8 @@ public class PantallaJuego extends Pantalla {
 
             mapa.dibujar(camara.getCamara());
 
-            b.setProjectionMatrix(camara.getCamara().combined);
-            b.begin();
+            batch.setProjectionMatrix(camara.getCamara().combined);
+            batch.begin();
 
                   jugador.actualizarFisicas(listaDeEntidades, delta);
 
@@ -164,22 +153,22 @@ public class PantallaJuego extends Pantalla {
             jugador.dibujar();
             jugador2.dibujar();
 
-            b.end();
+            batch.end();
 
-            b.setProjectionMatrix(stage.getCamera().combined);
+            batch.setProjectionMatrix(stage.getCamera().combined);
 
 
-            b.begin();
+            batch.begin();
 
             hud.dibujar();
 
-            b.end();
+            batch.end();
 
             stage.act(delta);
             stage.draw();
 
             if(terminarJuego || hiloServidor.isFin() || hiloServidor.isClienteDesconectado()){
-                cambiarPantalla(new PantallaMenu(juego));
+                cambiarPantalla(new PantallaMenu(juego, batch));
             }
 
         }
@@ -286,7 +275,4 @@ public class PantallaJuego extends Pantalla {
         }
     }
 
-    public ArrayList<Entidad> getListaDeEntidades() {
-        return listaDeEntidades;
-    }
 }

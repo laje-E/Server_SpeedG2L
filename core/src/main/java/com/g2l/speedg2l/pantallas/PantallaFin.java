@@ -21,27 +21,24 @@ public class PantallaFin extends Pantalla {
 
     private Stage stage;
     private PanelBotones panelBotones;
-    private SpriteBatch b;
-
     private EfectoSonido efectoMeta;
     private Texto textoResultados;
     private PosicionFinal[] posiciones;
 
-    public PantallaFin(Game juego, PosicionFinal[] posiciones) {
-        super(juego);
+    public PantallaFin(Game juego, PosicionFinal[] posiciones, SpriteBatch b) {
+        super(juego, b);
         this.posiciones = posiciones;
     }
 
     @Override
     public void show() {
-        b = Render.batch;
-
         stage = new Stage(configViewport.getViewport());
 
         textoResultados = new Texto(
             Recursos.FUENTE_MENU,
             35,
-            Color.GREEN
+            Color.GREEN,
+            batch
         );
 
         actualizarResultados(posiciones);
@@ -109,7 +106,7 @@ public class PantallaFin extends Pantalla {
                         float x,
                         float y
                     ) {
-                        cambiarPantalla(new PantallaMenu(juego));
+                        cambiarPantalla(new PantallaMenu(juego, batch));
                     }
                 },
                 ANCHO_BOTONES,
@@ -123,11 +120,11 @@ public class PantallaFin extends Pantalla {
     public void render(float delta) {
         Render.limpiarPantalla();
 
-        configViewport.aplicarViewport(b);
+        configViewport.aplicarViewport(batch);
 
-        b.begin();
+        batch.begin();
         textoResultados.dibujar();
-        b.end();
+        batch.end();
 
         stage.act(delta);
         stage.draw();

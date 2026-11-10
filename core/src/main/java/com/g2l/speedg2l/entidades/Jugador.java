@@ -1,5 +1,6 @@
 package com.g2l.speedg2l.entidades;
 
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;
 import com.g2l.speedg2l.animaciones.AnimacionEntidad;
 import com.g2l.speedg2l.utilidades.Direccion;
@@ -38,16 +39,14 @@ public class Jugador extends Entidad {
 
     private final float DURACION_EFECTO_LAVA = 0.5f;
     private final double REBOTE_LAVA = 350;
-    private final float DURACION_RALENTIZACION = 5.0f;
-    private final double VELOCIDAD_MAX_RALENTIZADO = 100;
     private float tiempoRalentizacion = 0;
     private float tiempoEfectoLava = 0;
 
     private double limiteVelocidad = 0;
 
-    public Jugador(float ancho , float alto, float posicionX, float posicionY, String ruta){
+    public Jugador(float ancho , float alto, float posicionX, float posicionY, SpriteBatch batch, String ruta){
         super(ancho, alto, posicionX, posicionY);
-        animacion = new AnimacionEntidad(ruta, 0.09f, 4, 3);
+        animacion = new AnimacionEntidad(ruta, 0.09f, 4, 3, batch);
         animacion.iniciar();
     }
 
@@ -113,6 +112,7 @@ public class Jugador extends Entidad {
 
     private void asignarLimiteVelocidad() {
         if (tiempoRalentizacion > 0) {
+            double VELOCIDAD_MAX_RALENTIZADO = 100;
             limiteVelocidad = VELOCIDAD_MAX_RALENTIZADO;
         } else {
             limiteVelocidad = VELOCIDAD_MAXIMA;
@@ -471,6 +471,7 @@ public class Jugador extends Entidad {
 
 
     public void aplicarEfectoLava() {
+        float DURACION_RALENTIZACION = 5.0f;
         tiempoRalentizacion = DURACION_RALENTIZACION;
 
         if (tiempoEfectoLava > 0) {

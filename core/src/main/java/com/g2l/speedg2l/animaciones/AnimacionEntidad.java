@@ -2,6 +2,7 @@ package com.g2l.speedg2l.animaciones;
 
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.g2l.speedg2l.Cerrable;
 import com.g2l.speedg2l.utilidades.Render;
@@ -9,12 +10,15 @@ import com.g2l.speedg2l.utilidades.Render;
 public class AnimacionEntidad extends Animacion implements Cerrable {
 
     private Texture spritesheet;
+    private SpriteBatch batch;
     private Animation<TextureRegion> animacion;
     private float estadoTiempo;
     private int filas;
     private int columnas;
 
-    public AnimacionEntidad(String ruta, float velocidadFotograma, int columnas, int filas) {
+    public AnimacionEntidad(String ruta, float velocidadFotograma, int columnas, int filas, SpriteBatch batch) {
+        this.batch = batch;
+
         spritesheet = new Texture(ruta);
         this.columnas = columnas;
         this.filas = filas;
@@ -32,7 +36,7 @@ public class AnimacionEntidad extends Animacion implements Cerrable {
     public void dibujar(float x, float y, float ancho, float alto) {
         TextureRegion frame = getFrame();
 
-        Render.batch.draw(
+        batch.draw(
             frame,
             x,
             y,
