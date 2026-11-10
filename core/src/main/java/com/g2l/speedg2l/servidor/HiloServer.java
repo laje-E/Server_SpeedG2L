@@ -159,36 +159,22 @@ public class HiloServer extends Thread{
         }
 
         if (mensaje.equals(ProtocolosRed.CONEXION)) {
+
+            // Comprobar si el cliente ya está conectado.
             if (numeroCliente != -1) {
-                DireccionRed direccionCliente = clientes[numeroCliente].getDireccionRed();
-
-                enviarMensaje(ProtocolosRed.OK, direccionCliente.getIp(), direccionCliente.getPuerto());
-
-                if(cantClientes == 2) {
-                    enviarMensaje(
-                        ProtocolosRed.NUMERO_JUGADOR +
-                        ProtocolosRed.SEPARADOR +
-                        (numeroCliente + 1),
-                        direccionCliente.getIp(),
-                        direccionCliente.getPuerto()
-                    );
-
-                    if (partidaIniciada) {
-                        enviarMensajeAtodos(ProtocolosRed.EMPEZAR);
-                    }
-
-                }
+                enviarMensaje(ProtocolosRed.OK, ipPaquete, puertoPaquete);
                 return;
             }
 
-            if(cantClientes >= 2) {
+            // Comprobar si el servidor alcanzó el límite de jugadores.
+            if (cantClientes >= 2) {
                 enviarMensaje(ProtocolosRed.ERROR_LIMITE_CLIENTES, ipPaquete, puertoPaquete);
                 return;
             }
 
             int espacio = buscarEspacioLibre();
 
-            if(espacio != -1) {
+            if (espacio != -1) {
                 DireccionRed direccionRed = new DireccionRed(ipPaquete, puertoPaquete);
 
                 Jugador jugadorAsignado = (espacio == 0) ? jugador1 : jugador2;
@@ -204,23 +190,84 @@ public class HiloServer extends Thread{
 
                 if (cantClientes == 2) {
 
-                    for (int i=0; i < cantClientes; i++) {
+                    for (int i = 0; i < cantClientes; i++) {
                         DireccionRed direccionRedCliente = clientes[i].getDireccionRed();
 
                         enviarMensaje(
                             ProtocolosRed.NUMERO_JUGADOR +
-                            ProtocolosRed.SEPARADOR +
-                            (i + 1),
+                                ProtocolosRed.SEPARADOR +
+                                (i + 1),
                             direccionRedCliente.getIp(),
                             direccionRedCliente.getPuerto()
                         );
-
-                        iniciarCuentaRegresiva();
-
                     }
+
+                    iniciarCuentaRegresiva();
                 }
             }
 
+//            if (numeroCliente != -1) {
+//                DireccionRed direccionCliente = clientes[numeroCliente].getDireccionRed();
+//
+//                enviarMensaje(ProtocolosRed.OK, direccionCliente.getIp(), direccionCliente.getPuerto());
+//
+//                if(cantClientes == 2) {
+//                    enviarMensaje(
+//                        ProtocolosRed.NUMERO_JUGADOR +
+//                        ProtocolosRed.SEPARADOR +
+//                        (numeroCliente + 1),
+//                        direccionCliente.getIp(),
+//                        direccionCliente.getPuerto()
+//                    );
+//
+//                    if (partidaIniciada) {
+//                        enviarMensajeAtodos(ProtocolosRed.EMPEZAR);
+//                    }
+//
+//                }
+//                return;
+//            }
+
+//            int espacio = buscarEspacioLibre();
+//
+//            if(espacio != -1) {
+//                DireccionRed direccionRed = new DireccionRed(ipPaquete, puertoPaquete);
+//
+//                Jugador jugadorAsignado = (espacio == 0) ? jugador1 : jugador2;
+//
+//                clientes[espacio] = new Cliente(direccionRed, jugadorAsignado);
+//                ultimoContacto[espacio] = System.currentTimeMillis();
+//
+//                cantClientes++;
+//
+//                enviarMensaje(ProtocolosRed.OK, ipPaquete, puertoPaquete);
+//
+//                System.out.println("Cliente conectado: jugador " + (espacio + 1));
+//
+//                if (cantClientes == 2) {
+//
+//                    for (int i=0; i < cantClientes; i++) {
+//                        DireccionRed direccionRedCliente = clientes[i].getDireccionRed();
+//
+//                        enviarMensaje(
+//                            ProtocolosRed.NUMERO_JUGADOR +
+//                                ProtocolosRed.SEPARADOR +
+//                                (i + 1),
+//                            direccionRedCliente.getIp(),
+//                            direccionRedCliente.getPuerto()
+//                        );
+//
+//                        iniciarCuentaRegresiva();
+//
+//                    }
+//                }
+//            }
+//
+//            if(cantClientes >= 2) {
+//                enviarMensaje(ProtocolosRed.ERROR_LIMITE_CLIENTES, ipPaquete, puertoPaquete);
+//                return;
+//            }
+//
             return;
         }
 
@@ -261,7 +308,9 @@ public class HiloServer extends Thread{
 
                         enviarMensajeAtodos(ProtocolosRed.JUGADOR_DESCONECTADO);
 
-                        fin=true;
+                        if(partidaIniciada) {
+                            fin = true;
+                        }
                     }
 
             }
