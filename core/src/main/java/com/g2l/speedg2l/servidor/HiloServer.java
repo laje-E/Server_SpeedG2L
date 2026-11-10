@@ -1,17 +1,10 @@
 package com.g2l.speedg2l.servidor;
 
-import com.g2l.speedg2l.entidades.Entidad;
 import com.g2l.speedg2l.entidades.Jugador;
-import com.g2l.speedg2l.entidades.Jugadores;
 import com.g2l.speedg2l.pantallas.PantallaJuego;
-import com.g2l.speedg2l.utilidades.Direccion;
-import com.g2l.speedg2l.utilidades.Entradas;
 
-import javax.xml.crypto.Data;
 import java.io.IOException;
 import java.net.*;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 
 public class HiloServer extends Thread{
 
@@ -206,68 +199,6 @@ public class HiloServer extends Thread{
                 }
             }
 
-//            if (numeroCliente != -1) {
-//                DireccionRed direccionCliente = clientes[numeroCliente].getDireccionRed();
-//
-//                enviarMensaje(ProtocolosRed.OK, direccionCliente.getIp(), direccionCliente.getPuerto());
-//
-//                if(cantClientes == 2) {
-//                    enviarMensaje(
-//                        ProtocolosRed.NUMERO_JUGADOR +
-//                        ProtocolosRed.SEPARADOR +
-//                        (numeroCliente + 1),
-//                        direccionCliente.getIp(),
-//                        direccionCliente.getPuerto()
-//                    );
-//
-//                    if (partidaIniciada) {
-//                        enviarMensajeAtodos(ProtocolosRed.EMPEZAR);
-//                    }
-//
-//                }
-//                return;
-//            }
-
-//            int espacio = buscarEspacioLibre();
-//
-//            if(espacio != -1) {
-//                DireccionRed direccionRed = new DireccionRed(ipPaquete, puertoPaquete);
-//
-//                Jugador jugadorAsignado = (espacio == 0) ? jugador1 : jugador2;
-//
-//                clientes[espacio] = new Cliente(direccionRed, jugadorAsignado);
-//                ultimoContacto[espacio] = System.currentTimeMillis();
-//
-//                cantClientes++;
-//
-//                enviarMensaje(ProtocolosRed.OK, ipPaquete, puertoPaquete);
-//
-//                System.out.println("Cliente conectado: jugador " + (espacio + 1));
-//
-//                if (cantClientes == 2) {
-//
-//                    for (int i=0; i < cantClientes; i++) {
-//                        DireccionRed direccionRedCliente = clientes[i].getDireccionRed();
-//
-//                        enviarMensaje(
-//                            ProtocolosRed.NUMERO_JUGADOR +
-//                                ProtocolosRed.SEPARADOR +
-//                                (i + 1),
-//                            direccionRedCliente.getIp(),
-//                            direccionRedCliente.getPuerto()
-//                        );
-//
-//                        iniciarCuentaRegresiva();
-//
-//                    }
-//                }
-//            }
-//
-//            if(cantClientes >= 2) {
-//                enviarMensaje(ProtocolosRed.ERROR_LIMITE_CLIENTES, ipPaquete, puertoPaquete);
-//                return;
-//            }
-//
             return;
         }
 
@@ -301,16 +232,7 @@ public class HiloServer extends Thread{
                         }
                 }
                     else if(mensajePorPartes[ACCION].equals(ProtocolosRed.SE_SALIO_DEL_JUEGO)){
-                        clientes[numeroCliente] = null;
-                        cantClientes--;
-
-                        System.out.println("Jugador " + (numeroCliente + 1) + " desconectado. Jugadores conectados: " + cantClientes);
-
-                        enviarMensajeAtodos(ProtocolosRed.JUGADOR_DESCONECTADO);
-
-                        if(partidaIniciada) {
-                            fin = true;
-                        }
+                        desconectarCliente(numeroCliente);
                     }
 
             }
@@ -380,17 +302,25 @@ public class HiloServer extends Thread{
     private void desconectarCliente(int i) {
         if (clientes[i] == null) return;
 
-        boolean avisarRival = !terminado[i];
+        Jugador jugadorDesconectado = clientes[i].getJugador();
+
+        jugadorDesconectado.moverIzquierda(false);
+        jugadorDesconectado.moverDerecha(false);
 
         clientes[i] = null;
         cantClientes--;
 
-        System.out.println("Jugadores conectados: " + cantClientes);
+        System.out.println("Jugador " + (i + 1) + " desconectado. Jugadores conectados: " + cantClientes);
 
-        if(avisarRival){
-            enviarMensajeAtodos(ProtocolosRed.JUGADOR_DESCONECTADO);
-            clienteDesconectado = true;
+        if (cuentaEnCurso) {
+            cancelarCuenta();
         }
+
+        enviarMensajeAtodos(ProtocolosRed.JUGADOR_DESCONECTADO);
+
+        clienteDesconectado = true;
+
+        finalizarHilo();
     }
 
     private void iniciarCuentaRegresiva() {
