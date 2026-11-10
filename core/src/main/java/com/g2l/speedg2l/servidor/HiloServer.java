@@ -46,6 +46,7 @@ public class HiloServer extends Thread{
         try {
             direccionServer = InetAddress.getByName("255.255.255.255");
             puertoServer = new DatagramSocket(6412);
+            puertoServer.setSoTimeout(TIEMPO_ESPERA_RECEIVE);
         }catch (SocketException | UnknownHostException evento){
             evento.printStackTrace();
         }
@@ -111,10 +112,14 @@ public class HiloServer extends Thread{
             try{
                 puertoServer.receive(dp);
                 procesarMensaje(dp);
+
+            }catch(SocketTimeoutException timeout){
+                // Se agoto el tiempo de espera para recibir un paquete.
             }catch(IOException event){
                 if (puertoServer.isClosed()) {
                     break;
                 }
+
                 event.printStackTrace();
                 break;
             }
