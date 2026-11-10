@@ -119,9 +119,18 @@ public class PantallaJuego extends Pantalla {
             batch.end();
         }
 
-        if (terminarJuego || hiloServidor.isFin() || hiloServidor.isClienteDesconectado()) {
+        if (hiloServidor.isFin() || hiloServidor.isClienteDesconectado() || (hiloServidor.isFinSesionSolicitado() && terminarJuego)) {
+            hiloServidor.finalizarHilo();
             cambiarPantalla(new PantallaMenu(juego, batch));
             return;
+        }
+
+        if (hiloServidor.isReinicioSolicitado()) {
+
+            reiniciarPartida();
+
+            hiloServidor.confirmarReinicio();
+            hiloServidor.reiniciarPartida();
         }
 
         if(empieza) {
@@ -150,8 +159,9 @@ public class PantallaJuego extends Pantalla {
                 }
                 if (jugadorTermino[0] && jugadorTermino[1]) {
                     terminarJuego();
-                    hiloServidor.finalizarHilo();
                     terminarJuego = true;
+
+                    hiloServidor.marcarPartidaFinalizada();
                 }
 
 
@@ -230,6 +240,24 @@ public class PantallaJuego extends Pantalla {
                 hiloServidor.enviarMensajeAtodos(ProtocolosRed.TODOS_TERMINARON);
             }
         }
+    }
+
+    private void reiniciarPartida() {
+
+        empieza = false;
+        terminarJuego = false;
+
+        contadorPosicion = 1;
+
+        jugadorTermino = new boolean[2];
+        posiciones = new PosicionFinal[2];
+
+        // Reiniciar jugadores.
+        jugador.reiniciar();
+        jugador2.reiniciar();
+
+        // Reiniciar cronómetro del HUD.
+        hud.reiniciar();
     }
 
     @Override

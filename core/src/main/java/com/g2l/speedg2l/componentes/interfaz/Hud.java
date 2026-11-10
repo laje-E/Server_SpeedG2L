@@ -38,6 +38,10 @@ public class Hud implements Cerrable {
         cronometro.setTexto( "m: " + minutos + " seg: " + segundos + "," + centesimas);
     }
 
+    public void reiniciar() {
+        tiempo = 0.0f;
+    }
+
     @Override
     public void cerrar() {
         cronometro.cerrar();
