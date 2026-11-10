@@ -254,14 +254,7 @@ public class HiloServer extends Thread{
                         }
                 }
                     else if(mensajePorPartes[ACCION].equals(ProtocolosRed.SE_SALIO_DEL_JUEGO)){
-                        clientes[numeroCliente] = null;
-                        cantClientes--;
-
-                        System.out.println("Jugador " + (numeroCliente + 1) + " desconectado. Jugadores conectados: " + cantClientes);
-
-                        enviarMensajeAtodos(ProtocolosRed.JUGADOR_DESCONECTADO);
-
-                        fin=true;
+                        desconectarCliente(numeroCliente);
                     }
 
             }
@@ -331,17 +324,25 @@ public class HiloServer extends Thread{
     private void desconectarCliente(int i) {
         if (clientes[i] == null) return;
 
-        boolean avisarRival = !terminado[i];
+        Jugador jugadorDesconectado = clientes[i].getJugador();
+
+        jugadorDesconectado.moverIzquierda(false);
+        jugadorDesconectado.moverDerecha(false);
 
         clientes[i] = null;
         cantClientes--;
 
-        System.out.println("Jugadores conectados: " + cantClientes);
+        System.out.println("Jugador " + (i + 1) + " desconectado. Jugadores conectados: " + cantClientes);
 
-        if(avisarRival){
-            enviarMensajeAtodos(ProtocolosRed.JUGADOR_DESCONECTADO);
-            clienteDesconectado = true;
+        if (cuentaEnCurso) {
+            cancelarCuenta();
         }
+
+        enviarMensajeAtodos(ProtocolosRed.JUGADOR_DESCONECTADO);
+
+        clienteDesconectado = true;
+
+        finalizarHilo();
     }
 
     private void iniciarCuentaRegresiva() {

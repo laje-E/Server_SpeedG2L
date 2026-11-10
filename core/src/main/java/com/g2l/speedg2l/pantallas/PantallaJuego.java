@@ -119,6 +119,11 @@ public class PantallaJuego extends Pantalla {
             batch.end();
         }
 
+        if (terminarJuego || hiloServidor.isFin() || hiloServidor.isClienteDesconectado()) {
+            cambiarPantalla(new PantallaMenu(juego, batch));
+            return;
+        }
+
         if(empieza) {
             delta = Gdx.graphics.getDeltaTime();
 
@@ -166,10 +171,6 @@ public class PantallaJuego extends Pantalla {
 
             stage.act(delta);
             stage.draw();
-
-            if(terminarJuego || hiloServidor.isFin() || hiloServidor.isClienteDesconectado()){
-                cambiarPantalla(new PantallaMenu(juego, batch));
-            }
 
         }
     }
