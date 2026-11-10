@@ -15,7 +15,6 @@ import com.g2l.speedg2l.servidor.PosicionFinal;
 import com.g2l.speedg2l.sonidos.EfectoSonido;
 import com.g2l.speedg2l.utilidades.Config;
 import com.g2l.speedg2l.utilidades.Recursos;
-import com.g2l.speedg2l.utilidades.Render;
 
 public class PantallaFin extends Pantalla {
 

@@ -19,7 +19,6 @@ import com.g2l.speedg2l.servidor.ProtocolosRed;
 import com.g2l.speedg2l.sonidos.Musica;
 import com.g2l.speedg2l.utilidades.Config;
 import com.g2l.speedg2l.utilidades.Recursos;
-import com.g2l.speedg2l.utilidades.Render;
 
 import java.util.ArrayList;
 
