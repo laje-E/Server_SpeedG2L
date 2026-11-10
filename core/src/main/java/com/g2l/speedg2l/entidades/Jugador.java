@@ -471,8 +471,8 @@ public class Jugador extends Entidad {
 
 
     public void aplicarEfectoLava() {
-        float DURACION_RALENTIZACION = 5.0f;
-        tiempoRalentizacion = DURACION_RALENTIZACION;
+        float duracion_Ralentizacion = 3.0f;
+        tiempoRalentizacion = duracion_Ralentizacion;
 
         if (tiempoEfectoLava > 0) {
             return;
