@@ -44,6 +44,9 @@ public class Jugador extends Entidad {
 
     private double limiteVelocidad = 0;
 
+    private final float POSICION_INICIAL_X = 0;
+    private final float POSICION_INICIAL_Y = 0;
+
     public Jugador(float ancho , float alto, float posicionX, float posicionY, SpriteBatch batch, String ruta){
         super(ancho, alto, posicionX, posicionY);
         animacion = new AnimacionEntidad(ruta, 0.09f, 4, 3, batch);
@@ -83,6 +86,44 @@ public class Jugador extends Entidad {
             saltando = true;
         }
     }
+
+
+    public void reiniciar() {
+
+        // 1. Restablecer posición.
+        posicionX = POSICION_INICIAL_X;
+        posicionY = POSICION_INICIAL_Y;
+
+        // 2. Restablecer velocidades horizontales.
+        velocidadConAceleracionDerecha = VELOCIDAD_X;
+        velocidadConAceleracionIzquierda = VELOCIDAD_X;
+
+        // 3. Restablecer movimiento vertical.
+        velocidadYMenosGravedad = 0;
+
+        // 4. Desactivar controles.
+        acelerandoDerecha = false;
+        acelerandoIzquierda = false;
+
+        // 5. Restablecer estados del jugador.
+        saltando = false;
+        rebotando = false;
+
+        // 6. Restablecer velocidades de rebote.
+        velocidadReboteX = 0;
+        velocidadReboteY = 0;
+
+        // 7. Restablecer efectos de lava.
+        tiempoRalentizacion = 0;
+        tiempoEfectoLava = 0;
+
+        // 8. Restablecer límite de velocidad.
+        limiteVelocidad = VELOCIDAD_MAXIMA;
+
+        // 9. Actualizar hitbox.
+        actualizarHitbox();
+    }
+
 
     public void actualizarFisicas(ArrayList<Entidad> listaDeEntidades, float delta) {
 
@@ -471,8 +512,8 @@ public class Jugador extends Entidad {
 
 
     public void aplicarEfectoLava() {
-        float DURACION_RALENTIZACION = 5.0f;
-        tiempoRalentizacion = DURACION_RALENTIZACION;
+        float duracion_Ralentizacion = 3.0f;
+        tiempoRalentizacion = duracion_Ralentizacion;
 
         if (tiempoEfectoLava > 0) {
             return;

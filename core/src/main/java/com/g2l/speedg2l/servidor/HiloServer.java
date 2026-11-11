@@ -34,6 +34,12 @@ public class HiloServer extends Thread{
     private long inicioCuenta = 0;
     private int ultimoNumeroEnviado = -1;
 
+    private boolean[] quiereRevancha = new boolean[2];
+
+    private boolean partidaFinalizada = false;
+    private boolean reinicioSolicitado = false;
+    private boolean finSesionSolicitado = false;
+
     public HiloServer(){
         clientes = new Cliente[2];
         try {
@@ -157,6 +163,38 @@ public class HiloServer extends Thread{
             return;
         }
 
+        if (numeroCliente != -1) {
+
+            if (mensaje.equals(ProtocolosRed.JUGAR_OTRA)) {
+
+                quiereRevancha[numeroCliente] = true;
+
+                enviarMensaje(
+                    ProtocolosRed.ESPERANDO_REVANCHA,
+                    ipPaquete,
+                    puertoPaquete
+                );
+
+                if (quiereRevancha[0] && quiereRevancha[1]) {
+
+                    reinicioSolicitado = true;
+                    partidaFinalizada = false;
+
+                    enviarMensajeAtodos(ProtocolosRed.NUEVA_PARTIDA);
+                }
+
+                return;
+            }
+
+            if (mensaje.equals(ProtocolosRed.VOLVER_MENU)) {
+
+                finSesionSolicitado = true;
+                enviarMensajeAtodos(ProtocolosRed.FIN_SESION);
+
+                return;
+            }
+        }
+
         if (numeroCliente == -1) {
             System.err.println("Error, cliente no detectado al revisar en el paquete.");
             return;
@@ -224,13 +262,12 @@ public class HiloServer extends Thread{
                         direccionRedCliente.getIp(),
                         direccionRedCliente.getPuerto()
                     );
-
-                    iniciarCuentaRegresiva();
                 }
+
+                iniciarCuentaRegresiva();
             }
         }
     }
-
 
     private void procesarAccionJugador(String[] mensajePorPartes, int numeroCliente) {
         final int ACCION = 0;
@@ -264,6 +301,24 @@ public class HiloServer extends Thread{
         }
     }
 
+    public void reiniciarPartida() {
+        terminado = new boolean[2];
+        quiereRevancha = new boolean[2];
+
+        long ahora = System.currentTimeMillis();
+        for (int i = 0; i < ultimoContacto.length; i++) {
+            ultimoContacto[i] = ahora;
+        }
+
+        partidaIniciada = false;
+        cuentaEnCurso = false;
+        cuentaRegresiva = 0;
+        ultimoNumeroEnviado = -1;
+        finSesionSolicitado = false;
+        partidaFinalizada = false;
+
+        iniciarCuentaRegresiva();
+    }
 
     private int buscarEspacioLibre() {
         int espacio = -1;
@@ -402,6 +457,23 @@ public class HiloServer extends Thread{
 
     public void setJugadorTerminado(int indice) {
         terminado[indice] = true;
+    }
+
+
+    public void marcarPartidaFinalizada() {
+        partidaFinalizada = true;
+    }
+
+    public boolean isReinicioSolicitado() {
+        return reinicioSolicitado;
+    }
+
+    public boolean isFinSesionSolicitado() {
+        return finSesionSolicitado;
+    }
+
+    public void confirmarReinicio() {
+        reinicioSolicitado = false;
     }
 
 }
