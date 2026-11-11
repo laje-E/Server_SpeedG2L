@@ -20,7 +20,6 @@ public class PantallaMenu extends Pantalla{
     private Stage stage;
     private PanelBotones panelBotones;
     private Imagen imagenFondo;
-    private Texto texto;
 
 
     public PantallaMenu(Game juego, SpriteBatch b) {
@@ -31,9 +30,7 @@ public class PantallaMenu extends Pantalla{
     public void show() {
         imagenFondo = new Imagen(Recursos.FONDO_MENU, batch);
         imagenFondo.setSize(Config.getAnchoJuego(), Config.getAltoJuego());
-        texto = new Texto(Recursos.FUENTE_MENU, 60, Color.RED, batch);
-        texto.setTexto("SpeedG2L");
-        texto.centrarArriba(100);
+
 
         stage = new Stage(configViewport.getViewport());
 
@@ -54,7 +51,6 @@ public class PantallaMenu extends Pantalla{
         configViewport.aplicarViewport(batch);
         batch.begin();
         imagenFondo.dibujar();
-        texto.dibujar();
 
         batch.end();
         stage.act(delta);
@@ -78,7 +74,6 @@ public class PantallaMenu extends Pantalla{
 
     @Override
     public void dispose() {
-        texto.cerrar();
         stage.dispose();
     }
 
