@@ -251,12 +251,33 @@ public class PantallaJuego extends Pantalla {
 
     @Override
     public void dispose() {
-        stage.dispose();
-//        b.dispose();
+        if (stage != null) {
+            stage.dispose();
+        }
+
         if (musicaJuego != null) {
             musicaJuego.cerrar();
         }
-        jugador.cerrar();
+
+        if (jugador != null) {
+            jugador.cerrar();
+        }
+
+        if (jugador2 != null) {
+            jugador2.cerrar();
+        }
+
+        if (mapa != null) {
+            mapa.cerrar();
+        }
+
+        if (hud != null) {
+            hud.cerrar();
+        }
+
+        if (textoEspera != null) {
+            textoEspera.cerrar();
+        }
     }
 
     public static void empezarJuego(){

@@ -18,6 +18,7 @@ import com.g2l.speedg2l.utilidades.Recursos;
 
 public class PantallaFin extends Pantalla {
 
+    private Skin skin;
     private Stage stage;
     private PanelBotones panelBotones;
     private EfectoSonido efectoMeta;
@@ -51,8 +52,7 @@ public class PantallaFin extends Pantalla {
             efectoMeta.reproducir();
         }
 
-        Skin skin = new Skin(
-            Gdx.files.internal("skin/uiskin.json")
+        skin = new Skin(Gdx.files.internal("skin/uiskin.json")
         );
 
         crearPanelBotones(skin);
@@ -156,6 +156,14 @@ public class PantallaFin extends Pantalla {
 
         if (efectoMeta != null) {
             efectoMeta.cerrar();
+        }
+
+        if (textoResultados != null) {
+            textoResultados.cerrar();
+        }
+
+        if (skin != null) {
+            skin.dispose();
         }
     }
 
