@@ -1,17 +1,10 @@
 package com.g2l.speedg2l.servidor;
 
-import com.g2l.speedg2l.entidades.Entidad;
 import com.g2l.speedg2l.entidades.Jugador;
-import com.g2l.speedg2l.entidades.Jugadores;
 import com.g2l.speedg2l.pantallas.PantallaJuego;
-import com.g2l.speedg2l.utilidades.Direccion;
-import com.g2l.speedg2l.utilidades.Entradas;
 
-import javax.xml.crypto.Data;
 import java.io.IOException;
 import java.net.*;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 
 public class HiloServer extends Thread{
 
@@ -49,6 +42,10 @@ public class HiloServer extends Thread{
             puertoServer.setSoTimeout(TIEMPO_ESPERA_RECEIVE);
         }catch (SocketException | UnknownHostException evento){
             evento.printStackTrace();
+            fin = true;
+            if (puertoServer != null && !puertoServer.isClosed()) {
+                puertoServer.close();
+            }
         }
     }
 
@@ -102,10 +99,7 @@ public class HiloServer extends Thread{
         System.out.println("Servidor iniciado. Esperando conexiones...");
 
         while(!fin && puertoServer != null && !puertoServer.isClosed()){
-            if(puertoServer == null){
-                System.err.println("El socket del servidor no está disponible.");
-                fin=true;
-            }
+
             byte[] data = new byte[1024];
             DatagramPacket dp = new DatagramPacket(data, data.length);
 
@@ -114,7 +108,7 @@ public class HiloServer extends Thread{
                 procesarMensaje(dp);
 
             }catch(SocketTimeoutException timeout){
-                // Se agoto el tiempo de espera para recibir un paquete.
+                // Aca se agoto el tiempo de espera para recibir un paquete.
             }catch(IOException event){
                 if (puertoServer.isClosed()) {
                     break;
@@ -135,7 +129,7 @@ public class HiloServer extends Thread{
         System.out.println("\n\nHiloServer finalizado.");
     }
 
-      private void procesarMensaje(DatagramPacket dp){
+    private void procesarMensaje(DatagramPacket dp){
         String mensaje = (new String (dp.getData())).trim();
         InetAddress ipPaquete = dp.getAddress();
         int puertoPaquete = dp.getPort();
@@ -143,7 +137,7 @@ public class HiloServer extends Thread{
         evaluarMensaje(mensaje, ipPaquete, puertoPaquete);
     }
 
-    private void evaluarMensaje(String mensaje, InetAddress ipPaquete, int puertoPaquete){
+    private void evaluarMensaje(String mensaje, InetAddress ipPaquete, int puertoPaquete) {
 
         int numeroCliente = detectarCliente(ipPaquete, puertoPaquete);
 
@@ -159,106 +153,117 @@ public class HiloServer extends Thread{
         }
 
         if (mensaje.equals(ProtocolosRed.CONEXION)) {
-            if (numeroCliente != -1) {
-                DireccionRed direccionCliente = clientes[numeroCliente].getDireccionRed();
+            procesarConexion(ipPaquete, puertoPaquete, numeroCliente);
+            return;
+        }
 
-                enviarMensaje(ProtocolosRed.OK, direccionCliente.getIp(), direccionCliente.getPuerto());
+        if (numeroCliente == -1) {
+            System.err.println("Error, cliente no detectado al revisar en el paquete.");
+            return;
+        }
 
-                if(cantClientes == 2) {
-                    enviarMensaje(
-                        ProtocolosRed.NUMERO_JUGADOR +
+        String[] mensajePorPartes = mensaje.split(ProtocolosRed.SEPARADOR);
+
+        procesarAccionJugador(mensajePorPartes, numeroCliente);
+    }
+
+    private void procesarConexion(InetAddress ipPaquete, int puertoPaquete, int numeroCliente) {
+
+        if (numeroCliente != -1) {
+            DireccionRed direccionCliente = clientes[numeroCliente].getDireccionRed();
+
+            enviarMensaje(ProtocolosRed.OK, direccionCliente.getIp(), direccionCliente.getPuerto());
+
+            if (cantClientes == 2) {
+                enviarMensaje(
+                    ProtocolosRed.NUMERO_JUGADOR +
                         ProtocolosRed.SEPARADOR +
                         (numeroCliente + 1),
-                        direccionCliente.getIp(),
-                        direccionCliente.getPuerto()
-                    );
+                    direccionCliente.getIp(),
+                    direccionCliente.getPuerto()
+                );
 
-                    if (partidaIniciada) {
-                        enviarMensajeAtodos(ProtocolosRed.EMPEZAR);
-                    }
-
-                }
-                return;
-            }
-
-            if(cantClientes >= 2) {
-                enviarMensaje(ProtocolosRed.ERROR_LIMITE_CLIENTES, ipPaquete, puertoPaquete);
-                return;
-            }
-
-            int espacio = buscarEspacioLibre();
-
-            if(espacio != -1) {
-                DireccionRed direccionRed = new DireccionRed(ipPaquete, puertoPaquete);
-
-                Jugador jugadorAsignado = (espacio == 0) ? jugador1 : jugador2;
-
-                clientes[espacio] = new Cliente(direccionRed, jugadorAsignado);
-                ultimoContacto[espacio] = System.currentTimeMillis();
-
-                cantClientes++;
-
-                enviarMensaje(ProtocolosRed.OK, ipPaquete, puertoPaquete);
-
-                System.out.println("Cliente conectado: jugador " + (espacio + 1));
-
-                if (cantClientes == 2) {
-
-                    for (int i=0; i < cantClientes; i++) {
-                        DireccionRed direccionRedCliente = clientes[i].getDireccionRed();
-
-                        enviarMensaje(
-                            ProtocolosRed.NUMERO_JUGADOR +
-                            ProtocolosRed.SEPARADOR +
-                            (i + 1),
-                            direccionRedCliente.getIp(),
-                            direccionRedCliente.getPuerto()
-                        );
-
-                        iniciarCuentaRegresiva();
-
-                    }
+                if (partidaIniciada) {
+                    enviarMensajeAtodos(ProtocolosRed.EMPEZAR);
                 }
             }
 
             return;
         }
 
-        String[] mensajePorPartes = mensaje.split(ProtocolosRed.SEPARADOR);
+        if (cantClientes >= 2) {
+            enviarMensaje(ProtocolosRed.ERROR_LIMITE_CLIENTES, ipPaquete, puertoPaquete);
+            return;
+        }
 
-        if(numeroCliente == -1){
-                System.err.println("Error, cliente no detectado al revisar en el paquete.");
-            }else{
-                final int ACCION=0;
-                final int SENTIDO=1;
-                Jugador jugadorCliente = clientes[numeroCliente].getJugador();
+        int espacio = buscarEspacioLibre();
 
-                if(mensajePorPartes[ACCION].equals(ProtocolosRed.APRETE)) {
+        if (espacio != -1) {
+            DireccionRed direccionRed = new DireccionRed(ipPaquete, puertoPaquete);
 
-                    if(mensajePorPartes[SENTIDO].equals(ProtocolosRed.IZQUIERDA)) {
-                        jugadorCliente.moverIzquierda(true);
-                    }
-                        else if (mensajePorPartes[SENTIDO].equals(ProtocolosRed.DERECHA)) {
-                            jugadorCliente.moverDerecha(true);
-                        }
-                            else if (mensajePorPartes[SENTIDO].equals(ProtocolosRed.ARRIBA)) {
-                                jugadorCliente.saltar();
-                            }
+            Jugador jugadorAsignado = (espacio == 0) ? jugador1 : jugador2;
 
-                } else if (mensajePorPartes[ACCION].equals(ProtocolosRed.NO_APRETE)) {
-                    if (mensajePorPartes[SENTIDO].equals(ProtocolosRed.IZQUIERDA)) {
-                        jugadorCliente.moverIzquierda(false);
-                    }
-                        else if (mensajePorPartes[SENTIDO].equals(ProtocolosRed.DERECHA)) {
-                            jugadorCliente.moverDerecha(false);
-                        }
+            clientes[espacio] = new Cliente(direccionRed, jugadorAsignado);
+            ultimoContacto[espacio] = System.currentTimeMillis();
+
+            cantClientes++;
+
+            enviarMensaje(ProtocolosRed.OK, ipPaquete, puertoPaquete);
+
+            System.out.println("Cliente conectado: jugador " + (espacio + 1));
+
+            if (cantClientes == 2) {
+
+                for (int i = 0; i < cantClientes; i++) {
+                    DireccionRed direccionRedCliente = clientes[i].getDireccionRed();
+
+                    enviarMensaje(
+                        ProtocolosRed.NUMERO_JUGADOR +
+                            ProtocolosRed.SEPARADOR +
+                            (i + 1),
+                        direccionRedCliente.getIp(),
+                        direccionRedCliente.getPuerto()
+                    );
+
+                    iniciarCuentaRegresiva();
                 }
-                    else if(mensajePorPartes[ACCION].equals(ProtocolosRed.SE_SALIO_DEL_JUEGO)){
-                        desconectarCliente(numeroCliente);
-                    }
-
             }
+        }
     }
+
+
+    private void procesarAccionJugador(String[] mensajePorPartes, int numeroCliente) {
+        final int ACCION = 0;
+        final int SENTIDO = 1;
+
+        Jugador jugadorCliente = clientes[numeroCliente].getJugador();
+
+        if (mensajePorPartes[ACCION].equals(ProtocolosRed.APRETE)) {
+
+            if (mensajePorPartes[SENTIDO].equals(ProtocolosRed.IZQUIERDA)) {
+                jugadorCliente.moverIzquierda(true);
+            }
+            else if (mensajePorPartes[SENTIDO].equals(ProtocolosRed.DERECHA)) {
+                jugadorCliente.moverDerecha(true);
+            }
+            else if (mensajePorPartes[SENTIDO].equals(ProtocolosRed.ARRIBA)) {
+                jugadorCliente.saltar();
+            }
+
+        } else if (mensajePorPartes[ACCION].equals(ProtocolosRed.NO_APRETE)) {
+
+            if (mensajePorPartes[SENTIDO].equals(ProtocolosRed.IZQUIERDA)) {
+                jugadorCliente.moverIzquierda(false);
+            }
+            else if (mensajePorPartes[SENTIDO].equals(ProtocolosRed.DERECHA)) {
+                jugadorCliente.moverDerecha(false);
+            }
+
+        } else if (mensajePorPartes[ACCION].equals(ProtocolosRed.SE_SALIO_DEL_JUEGO)) {
+            desconectarCliente(numeroCliente);
+        }
+    }
+
 
     private int buscarEspacioLibre() {
         int espacio = -1;
