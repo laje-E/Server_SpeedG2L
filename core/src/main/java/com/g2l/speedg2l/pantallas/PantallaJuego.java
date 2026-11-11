@@ -212,7 +212,7 @@ public class PantallaJuego extends Pantalla {
             jugadorTermino[indice] = true;
             hiloServidor.setJugadorTerminado(indice);
 
-            posiciones[contadorPosicion - 1] = new PosicionFinal(hud.getTiempo(), contadorPosicion, idJugador);
+            posiciones[contadorPosicion - 1] = new PosicionFinal(hud.getTiempo(), idJugador,  contadorPosicion);
 
             hiloServidor.enviarMensajeAtodos(
                 ProtocolosRed.LLEGO +
