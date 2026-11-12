@@ -148,7 +148,7 @@ public class PantallaJuego extends Pantalla {
                   jugador.actualizarFisicas(listaDeEntidades, delta);
 
                   jugador2.actualizarFisicas(listaDeEntidades, delta);
-                  hiloServidor.realizarBroadcastJuego();
+                  hiloServidor.realizarTransmisionDatosJuego();
 
                 hud.actualizar();
                 if (!jugadorTermino[0] && jugador.colisionaCon(meta)) {

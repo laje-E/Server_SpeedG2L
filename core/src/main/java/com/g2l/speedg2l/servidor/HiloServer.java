@@ -83,7 +83,7 @@ public class HiloServer extends Thread{
     }
 
 
-    public void realizarBroadcastJuego() {
+    public void realizarTransmisionDatosJuego() {
         for (int i = 0; i < clientes.length; i++) {
             if (clientes[i] != null) {
                 Jugador jugadorCliente = clientes[i].getJugador();
